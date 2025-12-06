@@ -1,4 +1,5 @@
 import arcade
+from arcade.gui import UIFlatButton, UIManager
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -6,9 +7,51 @@ SCREEN_TITLE = "Fish_hunter"
 PLATFORM_TOP = 60
 
 
-class Fish_hunter_game(arcade.Window):
+class Fish_hunter_menu(arcade.View):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
+        self.ui_manager = UIManager()
+
+        # Создаем кнопку "Играть"
+        play_button = UIFlatButton(text="Играть", width=100)
+        play_button.on_click = self.start_game
+        self.ui_manager.add(play_button)
+        play_button.center_x = SCREEN_WIDTH // 2
+        play_button.center_y = SCREEN_HEIGHT // 2
+
+        # Создаем кнопку "Выход"
+        quit_button = UIFlatButton(text="Выход", width=100)
+        quit_button.on_click = self.quit_game
+        self.ui_manager.add(quit_button)
+        quit_button.center_x = SCREEN_WIDTH // 2
+        quit_button.center_y = SCREEN_HEIGHT // 2 - 50
+
+
+    def on_show_view(self):
+        # Активируем менеджер UI
+        self.ui_manager.enable()
+        arcade.set_background_color(arcade.color.WHITE)
+
+    def on_hide_view(self):
+        # Деактивируем менеджер UI
+        self.ui_manager.disable()
+
+    def on_draw(self):
+        self.clear()
+        # Рисуем все элементы
+        arcade.draw_text("Fish hunter", 300, 500, arcade.color.AMBER, 24)
+        self.ui_manager.draw()
+
+    def start_game(self, event):
+        # Вызываем экран с игрой
+        self.window.show_view(Fish_hunter_game())
+
+    def quit_game(self, event):
+        arcade.exit()
+
+class Fish_hunter_game(arcade.View):
+    def __init__(self):
+        super().__init__()
         arcade.set_background_color(arcade.color.LIGHT_BLUE)
 
         # Позиция и скорость кубика
@@ -78,8 +121,10 @@ class Fish_hunter_game(arcade.Window):
 
 
 def main():
-    window = Fish_hunter_game()
-    window.run()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    menu_view = Fish_hunter_menu()
+    window.show_view(menu_view)
+    arcade.run()
 
 
 if __name__ == "__main__":
