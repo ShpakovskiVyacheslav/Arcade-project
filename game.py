@@ -1,6 +1,8 @@
 import arcade
 from character import Potap, SCREEN_WIDTH, SCREEN_HEIGHT, PLATFORM_TOP
 
+TILE_SCALING = 1
+
 
 class Fish_hunter_game(arcade.View):
     def __init__(self):
@@ -16,15 +18,19 @@ class Fish_hunter_game(arcade.View):
         self.left_pressed = False
         self.right_pressed = False
 
+        map_name = "platform.tmx"
+        tile_map = arcade.load_tilemap(map_name, scaling=TILE_SCALING)
+        self.platform = tile_map.sprite_lists["grass"]
+
+        # c PhysicsEngineSimple работает криво
+        # self.physics_engine = arcade.PhysicsEngineSimple(
+        #     self.player, self.platform
+        # )
+
     def on_draw(self):
         self.clear()
 
-        # Рисуем платформу
-        arcade.draw_rect_filled(
-            arcade.rect.XYWH(SCREEN_WIDTH // 2, PLATFORM_TOP // 2,
-                             SCREEN_WIDTH, PLATFORM_TOP),
-            arcade.color.BROWN
-        )
+        self.platform.draw()
 
         # Рисуем игрока
         self.all_sprite.draw()
@@ -40,6 +46,8 @@ class Fish_hunter_game(arcade.View):
 
         # Обновляем физику и движение
         self.player.update_movement()
+
+        # self.physics_engine.update()
 
         # Обновляем анимацию
         self.player.update_animation(delta_time)

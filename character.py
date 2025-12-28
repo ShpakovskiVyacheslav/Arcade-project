@@ -19,7 +19,7 @@ class Potap(arcade.Sprite):
         super().__init__()
 
         # Основные характеристики
-        self.scale = 1
+        self.scale = 1  # если поставьте больше 1 работать будет криво
         self.speed = 5
 
         # Физические параметры
