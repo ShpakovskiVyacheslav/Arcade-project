@@ -1,20 +1,14 @@
 import arcade
-import enum
-
-
-# Делаем класс для направления взгляда персонажа,
-class FaceDirection(enum.Enum):
-    LEFT = 0
-    RIGHT = 1
 
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Fish_hunter"
-PLATFORM_TOP = 60
+CAMERA_LERP = 0.12
+GRAVITY = 0.5
 
 
-class Potap(arcade.Sprite):
+class Player_Potap(arcade.Sprite):
     def __init__(self):
         super().__init__()
 
@@ -25,7 +19,6 @@ class Potap(arcade.Sprite):
         # Физические параметры
         self.dx = 0
         self.dy = 0
-        self.gravity = 0.5
         self.jump_speed = 15
 
         # Загрузка текстур
@@ -42,97 +35,83 @@ class Potap(arcade.Sprite):
             texture = arcade.load_texture(f"static/images/cat/Cat_jump_{i}.png")
             self.jump_textures.append(texture)
 
-        self.current_texture = 0
+        self.x_frame_animation = 0
         self.texture_change_time = 0
         self.texture_change_delay = 0.1  # секунд на кадр
+        self.jump_time = 0
+        self.jump_time_animation = 0.5
+        self.y_frame_animation = 0
 
         self.is_walking = False
         self.is_jumping = False
-        self.face_direction = FaceDirection.RIGHT
+        self.face_direction = True
 
         # Начальная позиция
-        self.center_x = SCREEN_WIDTH // 2
-        self.center_y = PLATFORM_TOP + 100  # Над платформой
+        self.center_x = 100
+        self.center_y = 400  # Над платформой
 
     def update_animation(self, delta_time: float = 1 / 60):
         # Обновление анимации
         if self.is_jumping:
             # Анимация прыжка в зависимости от скорости по Y
-            if self.dy > 10:
+            if self.change_y > 10:
                 texture_index = 0
-            elif self.dy > 5:
-                texture_index = 1
-            elif self.dy > 1:
+            elif self.change_y > 0:
                 texture_index = 2
-            elif self.dy < -1:
-                texture_index = 3
+            elif self.change_y < -1:
+                texture_index = 4
+            elif self.change_y < -10:
+                texture_index = 5
             else:
                 texture_index = 4
 
-            if self.face_direction == FaceDirection.RIGHT:
+            if self.face_direction:
                 self.texture = self.jump_textures[texture_index]
             else:
                 self.texture = self.jump_textures[texture_index].flip_horizontally()
+
 
         elif self.is_walking:
             # Анимация ходьбы
             self.texture_change_time += delta_time
             if self.texture_change_time >= self.texture_change_delay:
                 self.texture_change_time = 0
-                self.current_texture += 1
-                if self.current_texture >= len(self.walk_textures):
-                    self.current_texture = 0
+                self.x_frame_animation += 1
+                if self.x_frame_animation >= len(self.walk_textures):
+                    self.x_frame_animation = 0
 
-                if self.face_direction == FaceDirection.RIGHT:
-                    self.texture = self.walk_textures[self.current_texture]
+                if self.face_direction:
+                    self.texture = self.walk_textures[self.x_frame_animation]
                 else:
-                    self.texture = self.walk_textures[self.current_texture].flip_horizontally()
+                    self.texture = self.walk_textures[self.x_frame_animation].flip_horizontally()
         else:
             # Анимация покоя
-            if self.face_direction == FaceDirection.RIGHT:
+            if self.face_direction:
                 self.texture = self.idle_texture
             else:
                 self.texture = self.idle_texture.flip_horizontally()
 
     def update_movement(self):
-        # Физика персонажа
-        # Гравитация
-        self.dy -= self.gravity
-
         # Перемещение
         self.center_x += self.dx
         self.center_y += self.dy
 
-        # Ограничение движения по горизонтали
-        if self.center_x < self.width / 2:
-            self.center_x = self.width / 2
-        if self.center_x > SCREEN_WIDTH - self.width / 2:
-            self.center_x = SCREEN_WIDTH - self.width / 2
-
-        # Проверка столкновения с платформой
-        platform_top = PLATFORM_TOP
-        if self.center_y - self.height / 2 < platform_top:
-            self.center_y = platform_top + self.height / 2
-            self.dy = 0
-            self.is_jumping = False
-
         # Определение состояния для анимации
         self.is_walking = abs(self.dx) > 0.1
-        self.is_jumping = self.dy != 0 or abs(self.dy) > 0.1
+        self.is_jumping = self.change_y != 0
 
     def move_left(self):
         self.dx = -self.speed
-        self.face_direction = FaceDirection.LEFT
+        self.face_direction = False
 
     def move_right(self):
         self.dx = self.speed
-        self.face_direction = FaceDirection.RIGHT
+        self.face_direction = True
 
     def stop_horizontal(self):
         self.dx = 0
 
     def jump(self):
         # Прыжок возможен только если персонаж стоит на платформе
-        if self.center_y - self.height / 2 <= PLATFORM_TOP + 1:
-            self.dy = self.jump_speed
-            self.is_jumping = True
+        #self.dy = self.jump_speed
+        self.is_jumping = True
