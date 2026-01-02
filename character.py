@@ -31,7 +31,7 @@ class Player_Potap(arcade.Sprite):
             self.walk_textures.append(texture)
 
         self.jump_textures = []
-        for i in range(5):
+        for i in range(6):
             texture = arcade.load_texture(f"static/images/cat/Cat_jump_{i}.png")
             self.jump_textures.append(texture)
 
@@ -56,12 +56,14 @@ class Player_Potap(arcade.Sprite):
             # Анимация прыжка в зависимости от скорости по Y
             if self.change_y > 10:
                 texture_index = 0
-            elif self.change_y > 0:
+            elif self.change_y > 3:
                 texture_index = 2
-            elif self.change_y < -1:
-                texture_index = 4
-            elif self.change_y < -10:
+            elif 3 >= self.change_y >= -3:
+                texture_index = 3
+            elif self.change_y < -15:
                 texture_index = 5
+            elif self.change_y < -3:
+                texture_index = 4
             else:
                 texture_index = 4
 
