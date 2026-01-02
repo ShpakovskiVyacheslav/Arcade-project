@@ -5,7 +5,6 @@ from arcade.camera import Camera2D
 
 TILE_SCALING = 1
 
-
 class Fish_hunter_game(arcade.View):
     def __init__(self):
         super().__init__()
@@ -26,14 +25,13 @@ class Fish_hunter_game(arcade.View):
         self.left_pressed = False
         self.right_pressed = False
 
-        map_name = "test2.tmx"
+        map_name = "test3.tmx"
         self.tile_map = arcade.load_tilemap(f"static/levels/{map_name}", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         self.spikes = self.scene["spikes"]
 
         # Кнопки (будут показаны при смерти)
         self.death_buttons = []
-        self.death_message = ""
 
         # Стиль для кнопок
         self.button_style = {
@@ -111,7 +109,6 @@ class Fish_hunter_game(arcade.View):
     def restart_game(self, event=None):
         # Начинаем игру сначало
         self.remove_death_buttons()
-        self.death_message = ""
 
         # Восстанавливаем игрока
         self.player = Player_Potap()
@@ -141,8 +138,6 @@ class Fish_hunter_game(arcade.View):
         if collision_list and player.alive:
             # Убиваем персонажа
             player.die()
-            self.death_message = "ВЫ УМЕРЛИ"
-            self.create_death_buttons()  # Создаем "кнопки смерти"
 
     def on_draw(self):
         self.clear()
@@ -150,12 +145,13 @@ class Fish_hunter_game(arcade.View):
         self.scene.draw()
         self.all_sprite.draw()
         self.gui_camera.use()
+        self.ui_manager.draw()
 
         # Рисуем сообщение о смерти
-        if self.death_message:
+        if not self.player.alive:
             # Сообщение о смерти
             arcade.draw_text(
-                self.death_message,
+                "ВЫ УМЕРЛИ",
                 SCREEN_WIDTH // 2,
                 SCREEN_HEIGHT // 2 + 80,
                 arcade.color.RED,
@@ -164,9 +160,8 @@ class Fish_hunter_game(arcade.View):
                 anchor_y="center",
                 bold=True
             )
-
-            # Рисуем UI (кнопки)
-            self.ui_manager.draw()
+            if not self.death_buttons:
+                self.create_death_buttons()
 
     def on_update(self, delta_time):
         # Обновляем только если персонаж жив

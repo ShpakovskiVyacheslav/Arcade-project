@@ -14,7 +14,7 @@ class Player_Potap(arcade.Sprite):
         self.alive = True  # флаг жизни
 
         # Основные характеристики
-        self.scale = 1  # если поставьте больше 1 работать будет криво
+        self.scale = 1
         self.speed = 5
 
         # Физические параметры
@@ -95,6 +95,8 @@ class Player_Potap(arcade.Sprite):
                 self.texture = self.idle_texture.flip_horizontally()
 
     def update_movement(self):
+        if self.center_y < 0:
+            self.die()
         # Перемещение
         self.center_x += self.dx
         self.center_y += self.dy
