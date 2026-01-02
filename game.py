@@ -1,8 +1,10 @@
 import arcade
+from arcade.gui import UIFlatButton, UIManager
 from character import Player_Potap, SCREEN_WIDTH, SCREEN_HEIGHT, CAMERA_LERP, GRAVITY
 from arcade.camera import Camera2D
 
 TILE_SCALING = 1
+
 
 class Fish_hunter_game(arcade.View):
     def __init__(self):
@@ -10,6 +12,10 @@ class Fish_hunter_game(arcade.View):
         arcade.set_background_color(arcade.color.LIGHT_BLUE)
         self.world_camera = Camera2D()
         self.gui_camera = Camera2D()
+
+        # UI менеджер для кнопок
+        self.ui_manager = UIManager()
+        self.ui_manager.enable()
 
         # Создаем игрока
         self.all_sprite = arcade.SpriteList()
@@ -20,56 +26,192 @@ class Fish_hunter_game(arcade.View):
         self.left_pressed = False
         self.right_pressed = False
 
-        map_name = "test.tmx"
+        map_name = "test2.tmx"
         self.tile_map = arcade.load_tilemap(f"static/levels/{map_name}", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
+        self.spikes = self.scene["spikes"]
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(player_sprite=self.player,
-                                                             platforms=self.scene["collision"],
-                                                             gravity_constant=GRAVITY)
+        # Кнопки (будут показаны при смерти)
+        self.death_buttons = []
+        self.death_message = ""
+
+        # Стиль для кнопок
+        self.button_style = {
+            "normal": {
+                "font_name": ("calibri", "arial"),
+                "font_size": 15,
+                "font_color": arcade.color.WHITE,
+                "bg": arcade.color.RED,
+                "border": arcade.color.DARK_RED,
+                "border_width": 2
+            },
+            "hover": {
+                "font_name": ("calibri", "arial"),
+                "font_size": 15,
+                "font_color": arcade.color.RED,
+                "bg": arcade.color.WHITE,
+                "border": arcade.color.DARK_RED,
+                "border_width": 2
+            },
+            "press": {
+                "font_name": ("calibri", "arial"),
+                "font_size": 15,
+                "font_color": arcade.color.RED,
+                "bg": arcade.color.LIGHT_GRAY,
+                "border": arcade.color.DARK_RED,
+                "border_width": 2
+            }
+        }
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            player_sprite=self.player,
+            platforms=self.scene["earth"],
+            gravity_constant=GRAVITY
+        )
+
+    def create_death_buttons(self):
+        # Создаем "кнопки смерти"
+        # Очищаем старые кнопки
+        for button in self.death_buttons:
+            self.ui_manager.remove(button)
+        self.death_buttons.clear()
+
+        # Кнопка "Начать заново"
+        restart_button = UIFlatButton(
+            text="Начать заново",
+            width=200,
+            height=40,
+            style=self.button_style
+        )
+        restart_button.on_click = self.restart_game
+        self.ui_manager.add(restart_button)
+        restart_button.center_x = SCREEN_WIDTH // 2
+        restart_button.center_y = SCREEN_HEIGHT // 2 - 40
+        self.death_buttons.append(restart_button)
+
+        # Кнопка "Вернуться в меню"
+        menu_button = UIFlatButton(
+            text="Вернуться в меню",
+            width=200,
+            height=40,
+            style=self.button_style
+        )
+        menu_button.on_click = self.return_to_menu
+        self.ui_manager.add(menu_button)
+        menu_button.center_x = SCREEN_WIDTH // 2
+        menu_button.center_y = SCREEN_HEIGHT // 2 - 100
+        self.death_buttons.append(menu_button)
+
+    def remove_death_buttons(self):
+        # Удаляем "кнопки смерти"
+        for button in self.death_buttons:
+            self.ui_manager.remove(button)
+        self.death_buttons.clear()
+
+    def restart_game(self, event=None):
+        # Начинаем игру сначало
+        self.remove_death_buttons()
+        self.death_message = ""
+
+        # Восстанавливаем игрока
+        self.player = Player_Potap()
+        self.all_sprite.append(self.player)
+
+        # Обновляем физический движок с новым игроком
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            player_sprite=self.player,
+            platforms=self.scene["earth"],
+            gravity_constant=GRAVITY
+        )
+
+        # Сбрасываем камеру
+        self.world_camera.position = (self.player.center_x, self.player.center_y)
+
+        # Сбрасываем управление
+        self.left_pressed = False
+        self.right_pressed = False
+
+    def return_to_menu(self, event=None):
+        # Возвращаемся в главное меню
+        from main import Fish_hunter_menu
+        self.window.show_view(Fish_hunter_menu())
+
+    def collision_with_enemies(self, player, enemies):
+        collision_list = arcade.check_for_collision_with_list(player, enemies)
+        if collision_list and player.alive:
+            # Убиваем персонажа
+            player.die()
+            self.death_message = "ВЫ УМЕРЛИ"
+            self.create_death_buttons()  # Создаем "кнопки смерти"
 
     def on_draw(self):
         self.clear()
-        # камера
         self.world_camera.use()
         self.scene.draw()
         self.all_sprite.draw()
         self.gui_camera.use()
 
-        # Рисуем игрока
+        # Рисуем сообщение о смерти
+        if self.death_message:
+            # Сообщение о смерти
+            arcade.draw_text(
+                self.death_message,
+                SCREEN_WIDTH // 2,
+                SCREEN_HEIGHT // 2 + 80,
+                arcade.color.RED,
+                48,
+                anchor_x="center",
+                anchor_y="center",
+                bold=True
+            )
+
+            # Рисуем UI (кнопки)
+            self.ui_manager.draw()
 
     def on_update(self, delta_time):
-        # Обновляем движение
-        if self.left_pressed and not self.right_pressed:
-            self.player.move_left()
-        elif self.right_pressed and not self.left_pressed:
-            self.player.move_right()
-        else:
-            self.player.stop_horizontal()
+        # Обновляем только если персонаж жив
+        if self.player.alive:
+            self.collision_with_enemies(self.player, self.spikes)
 
-        # Обновляем физику и движение
-        self.physics_engine.update()
-        self.player.update_movement()
+            # Обновляем движение
+            if self.left_pressed and not self.right_pressed:
+                self.player.move_left()
+            elif self.right_pressed and not self.left_pressed:
+                self.player.move_right()
+            else:
+                self.player.stop_horizontal()
 
-        # Обновляем анимацию
-        self.player.update_animation(delta_time)
+            # Обновляем физику и движение
+            self.physics_engine.update()
+            self.player.update_movement()
 
-        tx, ty = self.player.center_x, self.player.center_y
-        cx, cy = self.world_camera.position
-        smooth = (cx + (tx - cx) * CAMERA_LERP,
-                  cy + (ty - cy) * CAMERA_LERP)
+            # Обновляем анимацию
+            self.player.update_animation(delta_time)
 
-        half_w = self.world_camera.viewport_width / 2
-        half_h = self.world_camera.viewport_height / 2
+            tx, ty = self.player.center_x, self.player.center_y
+            cx, cy = self.world_camera.position
+            smooth = (cx + (tx - cx) * CAMERA_LERP,
+                      cy + (ty - cy) * CAMERA_LERP)
 
-        world_w = 4000
-        world_h = 4000
-        cam_x = max(half_w, min(world_w - half_w, smooth[0]))
-        cam_y = max(half_h, min(world_h - half_h, smooth[1]))
-        self.world_camera.position = (cam_x, cam_y)
+            half_w = self.world_camera.viewport_width / 2
+            half_h = self.world_camera.viewport_height / 2
+
+            world_w = 4000
+            world_h = 4000
+            cam_x = max(half_w, min(world_w - half_w, smooth[0]))
+            cam_y = max(half_h, min(world_h - half_h, smooth[1]))
+            self.world_camera.position = (cam_x, cam_y)
+
+        # Обновляем UI
+        self.ui_manager.on_update(delta_time)
+
         self.gui_camera.position = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
     def on_key_press(self, key, modifiers):
+        # Блокируем управление если персонаж мертв
+        if not self.player.alive:
+            return
+
         if key == arcade.key.LEFT or key == arcade.key.A:
             self.left_pressed = True
         elif key == arcade.key.RIGHT or key == arcade.key.D:
@@ -79,7 +221,19 @@ class Fish_hunter_game(arcade.View):
             self.physics_engine.jump(15)
 
     def on_key_release(self, key, modifiers):
+        # Блокируем управление если персонаж мертв
+        if not self.player.alive:
+            return
+
         if key == arcade.key.LEFT or key == arcade.key.A:
             self.left_pressed = False
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.right_pressed = False
+
+    def on_hide_view(self):
+        # Деактивируем менеджер UI
+        self.ui_manager.disable()
+
+    def on_show_view(self):
+        # Активируем менеджер UI
+        self.ui_manager.enable()

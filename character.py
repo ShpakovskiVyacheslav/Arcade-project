@@ -1,6 +1,5 @@
 import arcade
 
-
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Fish_hunter"
@@ -11,6 +10,8 @@ GRAVITY = 0.5
 class Player_Potap(arcade.Sprite):
     def __init__(self):
         super().__init__()
+
+        self.alive = True  # флаг жизни
 
         # Основные характеристики
         self.scale = 1  # если поставьте больше 1 работать будет криво
@@ -113,5 +114,21 @@ class Player_Potap(arcade.Sprite):
 
     def jump(self):
         # Прыжок возможен только если персонаж стоит на платформе
-        #self.dy = self.jump_speed
+        # self.dy = self.jump_speed
         self.is_jumping = True
+
+    def die(self):
+        self.alive = False
+        self.remove_from_sprite_lists()
+
+    def respawn(self, x=100, y=400):
+        # Возродить персонажа
+        self.alive = True
+        self.center_x = x
+        self.center_y = y
+        self.dx = 0
+        self.dy = 0
+        self.change_x = 0
+        self.change_y = 0
+        self.is_jumping = False
+        self.is_walking = False
