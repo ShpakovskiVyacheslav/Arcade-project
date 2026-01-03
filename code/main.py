@@ -1,11 +1,7 @@
 import arcade
 from arcade.gui import UIFlatButton, UIManager
 from game import Fish_hunter_game
-
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Fish_hunter"
-PLATFORM_TOP = 60
+from constants import *
 
 
 class Fish_hunter_menu(arcade.View):
@@ -49,7 +45,6 @@ class Fish_hunter_menu(arcade.View):
         self.ui_manager.add(quit_button)
         quit_button.center_x = SCREEN_WIDTH // 2
         quit_button.center_y = SCREEN_HEIGHT // 2 - 50
-
 
     def on_show_view(self):
         # Активируем менеджер UI

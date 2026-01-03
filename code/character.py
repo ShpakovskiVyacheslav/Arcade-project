@@ -1,11 +1,5 @@
 import arcade
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Fish_hunter"
-CAMERA_LERP = 0.12
-GRAVITY = 0.5
-
 
 class Player_Potap(arcade.Sprite):
     def __init__(self):
@@ -23,17 +17,17 @@ class Player_Potap(arcade.Sprite):
         self.jump_speed = 15
 
         # Загрузка текстур
-        self.idle_texture = arcade.load_texture("static/images/cat/Cat_stand.png")
+        self.idle_texture = arcade.load_texture("../static/images/cat/Cat_stand.png")
         self.texture = self.idle_texture
 
         self.walk_textures = []
         for i in range(3):
-            texture = arcade.load_texture(f"static/images/cat/Cat_sprint_{i}.png")
+            texture = arcade.load_texture(f"../static/images/cat/Cat_sprint_{i}.png")
             self.walk_textures.append(texture)
 
         self.jump_textures = []
         for i in range(6):
-            texture = arcade.load_texture(f"static/images/cat/Cat_jump_{i}.png")
+            texture = arcade.load_texture(f"../static/images/cat/Cat_jump_{i}.png")
             self.jump_textures.append(texture)
 
         self.x_frame_animation = 0

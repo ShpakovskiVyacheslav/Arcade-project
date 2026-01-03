@@ -1,9 +1,9 @@
 import arcade
 from arcade.gui import UIFlatButton, UIManager
-from character import Player_Potap, SCREEN_WIDTH, SCREEN_HEIGHT, CAMERA_LERP, GRAVITY
+from character import Player_Potap
 from arcade.camera import Camera2D
+from constants import *
 
-TILE_SCALING = 1
 
 class Fish_hunter_game(arcade.View):
     def __init__(self):
@@ -26,7 +26,7 @@ class Fish_hunter_game(arcade.View):
         self.right_pressed = False
 
         map_name = "test3.tmx"
-        self.tile_map = arcade.load_tilemap(f"static/levels/{map_name}", scaling=TILE_SCALING)
+        self.tile_map = arcade.load_tilemap(f"../static/levels/{map_name}", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         self.spikes = self.scene["spikes"]
 
