@@ -67,6 +67,9 @@ class Fish_hunter_game(arcade.View):
             gravity_constant=GRAVITY
         )
 
+        self.music = arcade.load_sound("../static/sounds/background music.mp3")
+        self.music_player = arcade.play_sound(self.music, loop=True)
+
     def create_death_buttons(self):
         # Создаем "кнопки смерти"
         # Очищаем старые кнопки
@@ -127,6 +130,9 @@ class Fish_hunter_game(arcade.View):
         # Сбрасываем управление
         self.left_pressed = False
         self.right_pressed = False
+
+        # Включаем музыку
+        self.music_player = arcade.play_sound(self.music, loop=True)
 
     def return_to_menu(self, event=None):
         # Возвращаемся в главное меню
@@ -196,6 +202,8 @@ class Fish_hunter_game(arcade.View):
             cam_x = max(half_w, min(world_w - half_w, smooth[0]))
             cam_y = max(half_h, min(world_h - half_h, smooth[1]))
             self.world_camera.position = (cam_x, cam_y)
+        else:
+            arcade.stop_sound(self.music_player)
 
         # Обновляем UI
         self.ui_manager.on_update(delta_time)
