@@ -26,7 +26,7 @@ class Fish_hunter_game(arcade.View):
         self.left_pressed = False
         self.right_pressed = False
 
-        map_name = "test3.tmx"
+        map_name = "level1.tmx"
         self.tile_map = arcade.load_tilemap(f"../static/levels/{map_name}", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         self.spikes = self.scene["spikes"]
