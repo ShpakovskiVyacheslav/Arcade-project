@@ -5,6 +5,7 @@ from arcade.camera import Camera2D
 from constants import *
 
 
+
 class Fish_hunter_game(arcade.View):
     def __init__(self):
         super().__init__()
@@ -69,6 +70,7 @@ class Fish_hunter_game(arcade.View):
 
         self.music = arcade.load_sound("../static/sounds/background music.mp3")
         self.music_player = arcade.play_sound(self.music, loop=True)
+        self.music_enabled = True
 
     def create_death_buttons(self):
         # Создаем "кнопки смерти"
@@ -222,6 +224,15 @@ class Fish_hunter_game(arcade.View):
         elif key == arcade.key.SPACE and self.physics_engine.can_jump(y_distance=1):
             self.player.jump()
             self.physics_engine.jump(15)
+
+        if key == arcade.key.O:
+            if not self.music_enabled:
+                self.music_enabled = True
+                arcade.stop_sound(self.music_player)
+                self.music_player = arcade.play_sound(self.music, loop=True)
+        if key == arcade.key.P:
+            self.music_enabled = False
+            arcade.stop_sound(self.music_player)
 
     def on_key_release(self, key, modifiers):
         # Блокируем управление если персонаж мертв

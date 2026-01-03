@@ -91,8 +91,10 @@ class Player_Potap(arcade.Sprite):
     def update_movement(self):
         if self.center_y < 0:
             self.die()
+
         # Перемещение
-        self.center_x += self.dx
+        if not self.left <= 0 > self.dx:
+            self.center_x += self.dx
         self.center_y += self.dy
 
         # Определение состояния для анимации
