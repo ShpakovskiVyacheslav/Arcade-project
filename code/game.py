@@ -31,6 +31,8 @@ class Fish_hunter_game(arcade.View):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         self.spikes = self.scene["spikes"]
 
+        self.score = 0
+
         # Кнопки (будут показаны при смерти)
         self.death_buttons = []
 
@@ -113,6 +115,9 @@ class Fish_hunter_game(arcade.View):
 
     def restart_game(self, event=None):
         # Начинаем игру сначало
+
+        self.score = 0
+
         self.remove_death_buttons()
 
         # Восстанавливаем игрока
@@ -134,7 +139,12 @@ class Fish_hunter_game(arcade.View):
         self.right_pressed = False
 
         # Включаем музыку
-        self.music_player = arcade.play_sound(self.music, loop=True)
+        if self.music_enabled:
+            self.music_player = arcade.play_sound(self.music, loop=True)
+
+        map_name = "level1.tmx"
+        self.tile_map = arcade.load_tilemap(f"../static/levels/{map_name}", scaling=TILE_SCALING)
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
     def return_to_menu(self, event=None):
         # Возвращаемся в главное меню
@@ -142,10 +152,24 @@ class Fish_hunter_game(arcade.View):
         self.window.show_view(Fish_hunter_menu())
 
     def collision_with_enemies(self, player, enemies):
+        # Проверка коллизии с препятствиями (кроме пропастей)
         collision_list = arcade.check_for_collision_with_list(player, enemies)
         if collision_list and player.alive:
             # Убиваем персонажа
             player.die()
+
+    def collision_with_items(self, player, item_name):
+        # Проверка коллизии с предметами
+        collision_list = arcade.check_for_collision_with_list(player, self.scene[item_name])
+        if collision_list:
+            if item_name == "fish1":
+                self.score += 100
+            if item_name == "fish3":
+                self.score += 200
+            if item_name == "fish4":
+                self.score += 500
+        for item in collision_list:
+            item.remove_from_sprite_lists()
 
     def on_draw(self):
         self.clear()
@@ -155,7 +179,19 @@ class Fish_hunter_game(arcade.View):
         self.gui_camera.use()
         self.ui_manager.draw()
 
-        # Рисуем сообщение о смерти
+        # Рисуем счет (сверху)
+        arcade.draw_text(
+            f"Счет: {self.score}",
+            SCREEN_WIDTH - 20,
+            SCREEN_HEIGHT - 40,
+            arcade.color.WHITE,
+            20,
+            anchor_x="right",
+            anchor_y="top",
+            bold=True
+        )
+
+        # Если персонаж мертв - рисуем экран смерти
         if not self.player.alive:
             # Сообщение о смерти
             arcade.draw_text(
@@ -168,6 +204,20 @@ class Fish_hunter_game(arcade.View):
                 anchor_y="center",
                 bold=True
             )
+
+            # Финальный счет
+            arcade.draw_text(
+                f"Финальный счет: {self.score}",
+                SCREEN_WIDTH // 2,
+                SCREEN_HEIGHT // 2 + 20,
+                arcade.color.WHITE,
+                30,
+                anchor_x="center",
+                anchor_y="center",
+                bold=True
+            )
+
+            # Создаем кнопки, если их еще нет
             if not self.death_buttons:
                 self.create_death_buttons()
 
@@ -175,6 +225,8 @@ class Fish_hunter_game(arcade.View):
         # Обновляем только если персонаж жив
         if self.player.alive:
             self.collision_with_enemies(self.player, self.spikes)
+            for i in range(1, 9):
+                self.collision_with_items(self.player, f"fish{i}")
 
             # Обновляем движение
             if self.left_pressed and not self.right_pressed:
