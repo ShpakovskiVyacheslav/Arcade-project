@@ -79,7 +79,7 @@ class FishHunterGame(arcade.View):
         )
 
         self.music = arcade.load_sound("../static/sounds/background music.mp3")
-        self.music_player = arcade.play_sound(self.music, loop=True)
+        self.music_player = arcade.play_sound(self.music, loop=True, volume=VOLUME)
         self.music_enabled = True
 
         self.cheating = False
@@ -152,7 +152,7 @@ class FishHunterGame(arcade.View):
 
         # Включаем музыку
         if self.music_enabled:
-            self.music_player = arcade.play_sound(self.music, loop=True)
+            self.music_player = arcade.play_sound(self.music, loop=True, volume=VOLUME)
 
         self.level = 1
         self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
@@ -303,10 +303,8 @@ class FishHunterGame(arcade.View):
             half_w = self.world_camera.viewport_width / 2
             half_h = self.world_camera.viewport_height / 2
 
-            world_w = 3150
-            world_h = 1000
-            cam_x = max(half_w, min(world_w - half_w, smooth[0]))
-            cam_y = max(half_h, min(world_h - half_h, smooth[1]))
+            cam_x = max(half_w, min(WORLD_PARAMETRS[f"level{self.level}"][0] - half_w, smooth[0]))
+            cam_y = max(half_h, min(WORLD_PARAMETRS[f"level{self.level}"][1] - half_h, smooth[1]))
             self.world_camera.position = (cam_x, cam_y)
         else:
             arcade.stop_sound(self.music_player)
@@ -335,7 +333,7 @@ class FishHunterGame(arcade.View):
                 arcade.stop_sound(self.music_player)
             else:
                 self.music_enabled = True
-                self.music_player = arcade.play_sound(self.music, loop=True)
+                self.music_player = arcade.play_sound(self.music, loop=True, volume=VOLUME)
 
         # Для отладки (дебага)
         if key == arcade.key.T:

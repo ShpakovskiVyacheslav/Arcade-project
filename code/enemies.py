@@ -1,12 +1,13 @@
 import arcade
 
+
 class Enemy(arcade.Sprite):
     def __init__(self, platform_list):
         super().__init__()
 
         self.platform_list = platform_list
         self.scale = 1
-        self.speed = 5
+        self.speed = 4
 
         self.walk_textures = []
         for i in range(8):
@@ -33,12 +34,11 @@ class Enemy(arcade.Sprite):
                 self.texture = self.walk_textures[self.x_frame_animation].flip_horizontally()
 
     def update_movement(self):
-        # Проверка. есть ли земля впереди
+        # Проверка есть ли земля впереди
         check_x = self.center_x + (self.width / 2 + 10) * self.face_direction
         check_y = self.center_y - self.height / 2 - 20
 
         sensor = arcade.SpriteSolidColor(10, 10, center_x=check_x, center_y=check_y, color=(255, 0, 0, 0))
-
 
         # Если впереди нет платформы - разворачиваемся
         collisions = arcade.check_for_collision_with_list(sensor, self.platform_list)

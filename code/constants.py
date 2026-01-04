@@ -5,3 +5,8 @@ SCREEN_TITLE = "Fish_hunter"
 CAMERA_LERP = 0.12
 GRAVITY = 0.5
 TILE_SCALING = 1
+WORLD_PARAMETRS = {
+    "level1": (3150, 1200),
+    "level2": (4200, 1200),
+}
+VOLUME = 0.1
