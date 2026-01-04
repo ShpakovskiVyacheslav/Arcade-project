@@ -7,7 +7,7 @@ class Enemy(arcade.Sprite):
 
         self.platform_list = platform_list
         self.scale = 1
-        self.speed = 4
+        self.speed = 1
 
         self.walk_textures = []
         for i in range(8):
@@ -52,3 +52,6 @@ class Enemy(arcade.Sprite):
 
         # Перемещение
         self.center_x += self.speed * self.face_direction
+
+    def die(self):
+        self.remove_from_sprite_lists()

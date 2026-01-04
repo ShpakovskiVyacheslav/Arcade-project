@@ -136,6 +136,10 @@ class FishHunterGame(arcade.View):
         self.player = Player_Potap()
         self.all_sprite.append(self.player)
 
+        self.level = 1
+        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
         # Обновляем физический движок с новым игроком
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             player_sprite=self.player,
@@ -154,9 +158,6 @@ class FishHunterGame(arcade.View):
         if self.music_enabled:
             self.music_player = arcade.play_sound(self.music, loop=True, volume=VOLUME)
 
-        self.level = 1
-        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
-        self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         for i in self.scene["enemies"]:
             enemy = Enemy(self.scene["earth"])
@@ -169,12 +170,21 @@ class FishHunterGame(arcade.View):
         from main import FishHunterMenu
         self.window.show_view(FishHunterMenu())
 
-    def collision_with_enemies(self, player, enemies):
+    def collision_with_enemies(self, player, enemies, type):
         # Проверка коллизии с препятствиями (кроме пропастей)
         collision_list = arcade.check_for_collision_with_list(player, enemies)
         if collision_list and player.alive:
             # Убиваем персонажа
-            player.die()
+            if type == "spike":
+                player.die()
+            elif type == "enemy":
+                for enemy in collision_list:
+                    print(player.bottom, enemy.top)
+                    if player.bottom + 10 <= enemy.top:
+                    # + 10 из-за того что проверка коллизии происходит каждые 1/60 секуды, а не 0
+                        player.die()
+                    else:
+                        enemy.die()
 
     def collision_with_items(self, player, item_name):
         # Проверка коллизии с предметами
@@ -270,8 +280,8 @@ class FishHunterGame(arcade.View):
         # Обновляем только если персонаж жив
         if self.player.alive:
             if not self.cheating:
-                self.collision_with_enemies(self.player, self.scene["spikes"])
-                self.collision_with_enemies(self.player, self.enemies_sprites)
+                self.collision_with_enemies(self.player, self.scene["spikes"], "spike")
+                self.collision_with_enemies(self.player, self.enemies_sprites, "enemy")
             for i in range(1, 9):
                 self.collision_with_items(self.player, f"fish{i}")
             self.collision_with_exit(self.player)
