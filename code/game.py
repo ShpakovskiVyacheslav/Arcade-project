@@ -3,6 +3,7 @@ from arcade.gui import UIFlatButton, UIManager
 from character import Player_Potap
 from arcade.camera import Camera2D
 from constants import *
+from enemies import Enemy
 
 
 class FishHunterGame(arcade.View):
@@ -21,6 +22,9 @@ class FishHunterGame(arcade.View):
         self.player = Player_Potap()
         self.all_sprite.append(self.player)
 
+        # Создаем список врагов
+        self.enemies_sprites = arcade.SpriteList()
+
         # Управление
         self.left_pressed = False
         self.right_pressed = False
@@ -29,6 +33,12 @@ class FishHunterGame(arcade.View):
         self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
+        # создаем врагов
+        for i in self.scene["enemies"]:
+            enemy = Enemy(self.scene["earth"])
+            enemy.position = i.position
+            self.enemies_sprites.append(enemy)
+            self.all_sprite.append(enemy)
         self.score = 0
 
         # Кнопки (будут показаны при смерти)
@@ -114,7 +124,9 @@ class FishHunterGame(arcade.View):
         self.death_buttons.clear()
 
     def restart_game(self, event=None):
-        # Начинаем игру сначало
+        # Начинаем игру сначала
+        self.all_sprite.clear()
+        self.enemies_sprites.clear()
 
         self.score = 0
 
@@ -145,6 +157,12 @@ class FishHunterGame(arcade.View):
         self.level = 1
         self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
+        for i in self.scene["enemies"]:
+            enemy = Enemy(self.scene["earth"])
+            enemy.position = i.position
+            self.enemies_sprites.append(enemy)
+            self.all_sprite.append(enemy)
 
     def return_to_menu(self, event=None):
         # Возвращаемся в главное меню
@@ -179,9 +197,16 @@ class FishHunterGame(arcade.View):
             self.moving_to_next_level()
 
     def moving_to_next_level(self):
+        self.all_sprite.clear()
+        self.enemies_sprites.clear()
         self.level += 1
         self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
+        for i in self.scene["enemies"]:
+            enemy = Enemy(self.scene["earth"])
+            enemy.position = i.position
+            self.enemies_sprites.append(enemy)
+            self.all_sprite.append(enemy)
         self.player.die()
         self.player = Player_Potap()
         self.all_sprite.append(self.player)
@@ -246,9 +271,14 @@ class FishHunterGame(arcade.View):
         if self.player.alive:
             if not self.cheating:
                 self.collision_with_enemies(self.player, self.scene["spikes"])
+                self.collision_with_enemies(self.player, self.enemies_sprites)
             for i in range(1, 9):
                 self.collision_with_items(self.player, f"fish{i}")
             self.collision_with_exit(self.player)
+
+            for i in self.enemies_sprites:
+                i.update_movement()
+                i.update_animation(delta_time)
 
             # Обновляем движение
             if self.left_pressed and not self.right_pressed:

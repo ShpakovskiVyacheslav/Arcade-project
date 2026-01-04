@@ -8,7 +8,7 @@ class Player_Potap(arcade.Sprite):
         self.alive = True  # флаг жизни
 
         # Основные характеристики
-        self.scale = 1.4
+        self.scale = 1
         self.speed = 5
 
         # Физические параметры
