@@ -37,7 +37,7 @@ class Enemy(arcade.Sprite):
         check_x = self.center_x + (self.width / 2 + 10) * self.face_direction
         check_y = self.center_y - self.height / 2 - 20
 
-        sensor = arcade.SpriteSolidColor(10, 10, center_x=check_x, check_y=check_y, color=(255, 0, 0, 0))
+        sensor = arcade.SpriteSolidColor(10, 10, center_x=check_x, center_y=check_y, color=(255, 0, 0, 0))
 
 
         # Если впереди нет платформы - разворачиваемся
