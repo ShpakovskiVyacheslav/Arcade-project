@@ -5,8 +5,7 @@ from arcade.camera import Camera2D
 from constants import *
 
 
-
-class Fish_hunter_game(arcade.View):
+class FishHunterGame(arcade.View):
     def __init__(self):
         super().__init__()
         arcade.set_background_color(arcade.color.LIGHT_BLUE)
@@ -26,10 +25,9 @@ class Fish_hunter_game(arcade.View):
         self.left_pressed = False
         self.right_pressed = False
 
-        map_name = "level1.tmx"
-        self.tile_map = arcade.load_tilemap(f"../static/levels/{map_name}", scaling=TILE_SCALING)
+        self.level = 1
+        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
-        self.spikes = self.scene["spikes"]
 
         self.score = 0
 
@@ -73,6 +71,8 @@ class Fish_hunter_game(arcade.View):
         self.music = arcade.load_sound("../static/sounds/background music.mp3")
         self.music_player = arcade.play_sound(self.music, loop=True)
         self.music_enabled = True
+
+        self.cheating = False
 
     def create_death_buttons(self):
         # Создаем "кнопки смерти"
@@ -142,14 +142,14 @@ class Fish_hunter_game(arcade.View):
         if self.music_enabled:
             self.music_player = arcade.play_sound(self.music, loop=True)
 
-        map_name = "level1.tmx"
-        self.tile_map = arcade.load_tilemap(f"../static/levels/{map_name}", scaling=TILE_SCALING)
+        self.level = 1
+        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
     def return_to_menu(self, event=None):
         # Возвращаемся в главное меню
-        from main import Fish_hunter_menu
-        self.window.show_view(Fish_hunter_menu())
+        from main import FishHunterMenu
+        self.window.show_view(FishHunterMenu())
 
     def collision_with_enemies(self, player, enemies):
         # Проверка коллизии с препятствиями (кроме пропастей)
@@ -170,6 +170,26 @@ class Fish_hunter_game(arcade.View):
                 self.score += 500
         for item in collision_list:
             item.remove_from_sprite_lists()
+
+    def collision_with_exit(self, player):
+        # Проверка коллизии с выходом (нужно перейти на следующий уровень)
+        # У слоя exit нулевая непрозрачность
+        collision_list = arcade.check_for_collision_with_list(player, self.scene["exit"])
+        if collision_list:
+            self.moving_to_next_level()
+
+    def moving_to_next_level(self):
+        self.level += 1
+        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
+        self.player.die()
+        self.player = Player_Potap()
+        self.all_sprite.append(self.player)
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            player_sprite=self.player,
+            platforms=self.scene["earth"],
+            gravity_constant=GRAVITY
+        )
 
     def on_draw(self):
         self.clear()
@@ -224,9 +244,11 @@ class Fish_hunter_game(arcade.View):
     def on_update(self, delta_time):
         # Обновляем только если персонаж жив
         if self.player.alive:
-            self.collision_with_enemies(self.player, self.spikes)
+            if not self.cheating:
+                self.collision_with_enemies(self.player, self.scene["spikes"])
             for i in range(1, 9):
                 self.collision_with_items(self.player, f"fish{i}")
+            self.collision_with_exit(self.player)
 
             # Обновляем движение
             if self.left_pressed and not self.right_pressed:
@@ -251,8 +273,8 @@ class Fish_hunter_game(arcade.View):
             half_w = self.world_camera.viewport_width / 2
             half_h = self.world_camera.viewport_height / 2
 
-            world_w = 4000
-            world_h = 4000
+            world_w = 3150
+            world_h = 1000
             cam_x = max(half_w, min(world_w - half_w, smooth[0]))
             cam_y = max(half_h, min(world_h - half_h, smooth[1]))
             self.world_camera.position = (cam_x, cam_y)
@@ -277,14 +299,20 @@ class Fish_hunter_game(arcade.View):
             self.player.jump()
             self.physics_engine.jump(15)
 
-        if key == arcade.key.O:
-            if not self.music_enabled:
-                self.music_enabled = True
-                arcade.stop_sound(self.music_player)
-                self.music_player = arcade.play_sound(self.music, loop=True)
         if key == arcade.key.P:
-            self.music_enabled = False
-            arcade.stop_sound(self.music_player)
+            if self.music_enabled:
+                self.music_enabled = False
+                arcade.stop_sound(self.music_player)
+            else:
+                self.music_enabled = True
+                self.music_player = arcade.play_sound(self.music, loop=True)
+
+        # Для отладки (дебага)
+        if key == arcade.key.T:
+            if not self.cheating:
+                self.cheating = True
+            else:
+                self.cheating = False
 
     def on_key_release(self, key, modifiers):
         # Блокируем управление если персонаж мертв

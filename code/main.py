@@ -1,10 +1,10 @@
 import arcade
 from arcade.gui import UIFlatButton, UIManager
-from game import Fish_hunter_game
+from game import FishHunterGame
 from constants import *
 
 
-class Fish_hunter_menu(arcade.View):
+class FishHunterMenu(arcade.View):
     def __init__(self):
         super().__init__()
         self.ui_manager = UIManager()
@@ -63,7 +63,7 @@ class Fish_hunter_menu(arcade.View):
 
     def start_game(self, event):
         # Вызываем экран с игрой
-        self.window.show_view(Fish_hunter_game())
+        self.window.show_view(FishHunterGame())
 
     def quit_game(self, event):
         arcade.exit()
@@ -71,7 +71,7 @@ class Fish_hunter_menu(arcade.View):
 
 def main():
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    menu_view = Fish_hunter_menu()
+    menu_view = FishHunterMenu()
     window.show_view(menu_view)
     arcade.run()
 
