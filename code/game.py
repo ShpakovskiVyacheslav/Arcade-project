@@ -158,7 +158,6 @@ class FishHunterGame(arcade.View):
         if self.music_enabled:
             self.music_player = arcade.play_sound(self.music, loop=True, volume=VOLUME)
 
-
         for i in self.scene["enemies"]:
             enemy = Enemy(self.scene["earth"])
             enemy.position = i.position
@@ -179,8 +178,8 @@ class FishHunterGame(arcade.View):
                 player.die()
             elif type == "enemy":
                 for enemy in collision_list:
-                    if player.bottom + 10 <= enemy.top and not self.cheating:
-                    # + 10 из-за того что проверка коллизии происходит каждые 1/60 секуды, а не 0
+                    if player.bottom + 15 <= enemy.top and not self.cheating:
+                        # + 15 из-за того что проверка коллизии происходит каждые 1/60 секуды, а не 0
                         player.die()
                     else:
                         enemy.die()
