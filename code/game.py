@@ -179,12 +179,12 @@ class FishHunterGame(arcade.View):
                 player.die()
             elif type == "enemy":
                 for enemy in collision_list:
-                    print(player.bottom, enemy.top)
-                    if player.bottom + 10 <= enemy.top:
+                    if player.bottom + 10 <= enemy.top and not self.cheating:
                     # + 10 из-за того что проверка коллизии происходит каждые 1/60 секуды, а не 0
                         player.die()
                     else:
                         enemy.die()
+                        self.score += 1000
 
     def collision_with_items(self, player, item_name):
         # Проверка коллизии с предметами
@@ -281,7 +281,7 @@ class FishHunterGame(arcade.View):
         if self.player.alive:
             if not self.cheating:
                 self.collision_with_enemies(self.player, self.scene["spikes"], "spike")
-                self.collision_with_enemies(self.player, self.enemies_sprites, "enemy")
+            self.collision_with_enemies(self.player, self.enemies_sprites, "enemy")
             for i in range(1, 9):
                 self.collision_with_items(self.player, f"fish{i}")
             self.collision_with_exit(self.player)

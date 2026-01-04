@@ -7,7 +7,7 @@ class Enemy(arcade.Sprite):
 
         self.platform_list = platform_list
         self.scale = 1
-        self.speed = 1
+        self.speed = 4
 
         self.walk_textures = []
         for i in range(8):
