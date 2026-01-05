@@ -30,15 +30,16 @@ class FishHunterGame(arcade.View):
         self.right_pressed = False
 
         self.level = 1
-        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
+        # self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
+        self.tile_map = arcade.load_tilemap(f"../static/levels/test_buffitems.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         # создаем врагов
-        for i in self.scene["enemies"]:
-            enemy = Enemy(self.scene["earth"])
-            enemy.position = i.position
-            self.enemies_sprites.append(enemy)
-            self.all_sprite.append(enemy)
+        # for i in self.scene["enemies"]:
+        #     enemy = Enemy(self.scene["earth"])
+        #     enemy.position = i.position
+        #     self.enemies_sprites.append(enemy)
+        #     self.all_sprite.append(enemy)
         self.score = 0
 
         # Кнопки (будут показаны при смерти)
@@ -83,6 +84,10 @@ class FishHunterGame(arcade.View):
         self.music_enabled = True
 
         self.cheating = False
+
+        self.jump_height = 15
+
+        self.active_buffs = []
 
     def create_death_buttons(self):
         # Создаем "кнопки смерти"
@@ -189,12 +194,29 @@ class FishHunterGame(arcade.View):
         # Проверка коллизии с предметами
         collision_list = arcade.check_for_collision_with_list(player, self.scene[item_name])
         if collision_list:
+            # Рыбы, дающий очки
             if item_name == "fish1":
                 self.score += 100
             if item_name == "fish3":
                 self.score += 200
             if item_name == "fish4":
                 self.score += 500
+            # Рыбы, дающие бафф
+            if item_name == "fish2":
+                self.jump_height += BIG_JUMP_DELTA_CONST
+            if item_name == "fish5":
+                player.speed += SPEED_DELTA_CONST
+            if item_name == "fish6":
+                player.scale = 1.4
+                self.cheating = True
+                player.speed = 12
+                for buff in self.active_buffs:
+                    if buff[0] == "RAGE":
+                        buff[1] += RAGE_BUFF_DURATION
+                else:
+                    self.active_buffs.append(["RAGE", RAGE_BUFF_DURATION])
+
+
         for item in collision_list:
             item.remove_from_sprite_lists()
 
@@ -278,12 +300,12 @@ class FishHunterGame(arcade.View):
     def on_update(self, delta_time):
         # Обновляем только если персонаж жив
         if self.player.alive:
-            if not self.cheating:
-                self.collision_with_enemies(self.player, self.scene["spikes"], "spike")
-            self.collision_with_enemies(self.player, self.enemies_sprites, "enemy")
+            # if not self.cheating:
+            #     self.collision_with_enemies(self.player, self.scene["spikes"], "spike")
+            # self.collision_with_enemies(self.player, self.enemies_sprites, "enemy")
             for i in range(1, 9):
                 self.collision_with_items(self.player, f"fish{i}")
-            self.collision_with_exit(self.player)
+            # self.collision_with_exit(self.player)
 
             for i in self.enemies_sprites:
                 i.update_movement()
@@ -323,6 +345,14 @@ class FishHunterGame(arcade.View):
 
         self.gui_camera.position = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
+        for i in self.active_buffs:
+            if i[1] < 0:
+                self.active_buffs.remove(i)
+                if i[0] == "RAGE":
+                    self.player.scale = 1
+                    self.cheating = False
+            i[1] -= delta_time
+
     def on_key_press(self, key, modifiers):
         # Блокируем управление если персонаж мертв
         if not self.player.alive:
@@ -334,7 +364,10 @@ class FishHunterGame(arcade.View):
             self.right_pressed = True
         elif key == arcade.key.SPACE and self.physics_engine.can_jump(y_distance=1):
             self.player.jump()
-            self.physics_engine.jump(15)
+            self.physics_engine.jump(self.jump_height)
+        elif (key == arcade.key.UP or key == arcade.key.W) and self.physics_engine.can_jump(y_distance=1):
+            self.player.jump()
+            self.physics_engine.jump(SMALL_JUMP_HEIGHT)
 
         if key == arcade.key.P:
             if self.music_enabled:
