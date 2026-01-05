@@ -8,6 +8,7 @@ TILE_SCALING = 1
 WORLD_PARAMETRS = {
     "level1": (3150, 1200),
     "level2": (4200, 1200),
+    "level3": (4200, 2500)
 }
 VOLUME = 0.1
 BIG_JUMP_DELTA_CONST = 2

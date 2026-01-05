@@ -30,16 +30,16 @@ class FishHunterGame(arcade.View):
         self.right_pressed = False
 
         self.level = 1
-        # self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
-        self.tile_map = arcade.load_tilemap(f"../static/levels/test_buffitems.tmx", scaling=TILE_SCALING)
+        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
+        # self.tile_map = arcade.load_tilemap(f"../static/levels/test_buffitems.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         # создаем врагов
-        # for i in self.scene["enemies"]:
-        #     enemy = Enemy(self.scene["earth"])
-        #     enemy.position = i.position
-        #     self.enemies_sprites.append(enemy)
-        #     self.all_sprite.append(enemy)
+        for i in self.scene["enemies"]:
+            enemy = Enemy(self.scene["earth"])
+            enemy.position = i.position
+            self.enemies_sprites.append(enemy)
+            self.all_sprite.append(enemy)
         self.score = 0
 
         # Кнопки (будут показаны при смерти)
@@ -209,13 +209,11 @@ class FishHunterGame(arcade.View):
             if item_name == "fish6":
                 player.scale = 1.4
                 self.cheating = True
-                player.speed = 12
                 for buff in self.active_buffs:
                     if buff[0] == "RAGE":
                         buff[1] += RAGE_BUFF_DURATION
                 else:
                     self.active_buffs.append(["RAGE", RAGE_BUFF_DURATION])
-
 
         for item in collision_list:
             item.remove_from_sprite_lists()
@@ -300,12 +298,12 @@ class FishHunterGame(arcade.View):
     def on_update(self, delta_time):
         # Обновляем только если персонаж жив
         if self.player.alive:
-            # if not self.cheating:
-            #     self.collision_with_enemies(self.player, self.scene["spikes"], "spike")
-            # self.collision_with_enemies(self.player, self.enemies_sprites, "enemy")
+            if not self.cheating:
+                self.collision_with_enemies(self.player, self.scene["spikes"], "spike")
+            self.collision_with_enemies(self.player, self.enemies_sprites, "enemy")
             for i in range(1, 9):
                 self.collision_with_items(self.player, f"fish{i}")
-            # self.collision_with_exit(self.player)
+            self.collision_with_exit(self.player)
 
             for i in self.enemies_sprites:
                 i.update_movement()
@@ -362,10 +360,11 @@ class FishHunterGame(arcade.View):
             self.left_pressed = True
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.right_pressed = True
-        elif key == arcade.key.SPACE and self.physics_engine.can_jump(y_distance=1):
+        elif key == arcade.key.SPACE and (self.physics_engine.can_jump(y_distance=1) or self.cheating):
             self.player.jump()
             self.physics_engine.jump(self.jump_height)
-        elif (key == arcade.key.UP or key == arcade.key.W) and self.physics_engine.can_jump(y_distance=1):
+        elif (key == arcade.key.UP or key == arcade.key.W) and (
+                self.physics_engine.can_jump(y_distance=1) or self.cheating):
             self.player.jump()
             self.physics_engine.jump(SMALL_JUMP_HEIGHT)
 
