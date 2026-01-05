@@ -1,10 +1,12 @@
 import arcade
 import sqlite3
+import random
 from arcade.gui import UIFlatButton, UIManager
 from character import Player_Potap
 from arcade.camera import Camera2D
 from constants import *
 from enemies import Enemy
+from arcade.particles import FadeParticle, Emitter, EmitBurst
 
 
 class FishHunterGame(arcade.View):
@@ -89,6 +91,12 @@ class FishHunterGame(arcade.View):
         self.jump_height = 15
 
         self.active_buffs = []
+
+        self.fireworks = []
+        self.firework_textures = []
+
+        for color in PARTICLE_COLORS:
+            self.firework_textures.append(arcade.make_soft_circle_texture(15, color, 255))
 
     def create_death_buttons(self):
         # Создаем "кнопки смерти"
@@ -182,6 +190,7 @@ class FishHunterGame(arcade.View):
             enemy.position = i.position
             self.enemies_sprites.append(enemy)
             self.all_sprite.append(enemy)
+        self.fireworks.clear()
 
     def return_to_menu(self, event=None):
         # Возвращаемся в главное меню
@@ -270,12 +279,41 @@ class FishHunterGame(arcade.View):
             platforms=self.scene["earth"],
             gravity_constant=GRAVITY
         )
+        self.fireworks.clear()
+
+    def create_firework(self, x, y):
+        for i in range(10):
+            texture = random.choice(self.firework_textures)
+            offset_x = random.uniform(-50, 50)
+            offset_y = random.uniform(-20, 20)
+
+            particle_count = random.randint(40, 100)
+            radius = random.uniform(2, 4)
+            lifetime = random.uniform(1.8, 3.5)
+
+            firework = Emitter(
+                center_xy=(x + offset_x, y + offset_y),
+                emit_controller=EmitBurst(particle_count),
+                particle_factory=lambda e, tex=texture, rad=radius, life=lifetime: FadeParticle(
+                    filename_or_texture=tex,
+                    change_xy=arcade.math.rand_in_circle((0.0, 0.0), rad),
+                    lifetime=life,
+                    start_alpha=random.randint(200, 255),
+                    end_alpha=0,
+                    scale=random.uniform(0.2, 0.8))
+            )
+            self.fireworks.append(firework)
 
     def on_draw(self):
         self.clear()
         self.world_camera.use()
         self.scene.draw()
         self.all_sprite.draw()
+
+        # Рисуем компактные фейерверки
+        for firework in self.fireworks:
+            firework.draw()
+
         self.gui_camera.use()
         self.ui_manager.draw()
 
@@ -352,8 +390,7 @@ class FishHunterGame(arcade.View):
 
             tx, ty = self.player.center_x, self.player.center_y
             cx, cy = self.world_camera.position
-            smooth = (cx + (tx - cx) * CAMERA_LERP,
-                      cy + (ty - cy) * CAMERA_LERP)
+            smooth = (cx + (tx - cx) * CAMERA_LERP, cy + (ty - cy) * CAMERA_LERP)
 
             half_w = self.world_camera.viewport_width / 2
             half_h = self.world_camera.viewport_height / 2
@@ -364,13 +401,18 @@ class FishHunterGame(arcade.View):
         else:
             arcade.stop_sound(self.music_player)
 
-        # Обновляем UI
+        # Обновляем фейерверки
+        for firework in self.fireworks[:]:
+            firework.update(delta_time)
+            if firework.can_reap():
+                self.fireworks.remove(firework)
+
         self.ui_manager.on_update(delta_time)
 
         self.gui_camera.position = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
         for i in self.active_buffs:
-            if i[1] < 0:
+            if i[1] <= 0:
                 self.active_buffs.remove(i)
                 if i[0] == "RAGE":
                     self.player.scale = 1
@@ -393,6 +435,13 @@ class FishHunterGame(arcade.View):
                 self.physics_engine.can_jump(y_distance=1) or self.cheating):
             self.player.jump()
             self.physics_engine.jump(SMALL_JUMP_HEIGHT)
+
+        # Создаем фейерверк
+        if key == arcade.key.Q:
+            firework_x = self.player.center_x
+            firework_y = self.player.center_y + 200
+
+            self.create_firework(firework_x, firework_y)
 
         if key == arcade.key.P:
             if self.music_enabled:
