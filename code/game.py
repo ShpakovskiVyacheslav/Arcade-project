@@ -1,4 +1,5 @@
 import arcade
+import sqlite3
 from arcade.gui import UIFlatButton, UIManager
 from character import Player_Potap
 from arcade.camera import Camera2D
@@ -119,8 +120,21 @@ class FishHunterGame(arcade.View):
         menu_button.on_click = self.return_to_menu
         self.ui_manager.add(menu_button)
         menu_button.center_x = SCREEN_WIDTH // 2
-        menu_button.center_y = SCREEN_HEIGHT // 2 - 100
+        menu_button.center_y = SCREEN_HEIGHT // 2 - 150
         self.death_buttons.append(menu_button)
+
+        # Кнопка с результатом
+        result_button = UIFlatButton(
+            text="Сохранить результат",
+            width=200,
+            height=40,
+            style=self.button_style
+        )
+        result_button.on_click = self.save_result_window
+        self.ui_manager.add(result_button)
+        result_button.center_x = SCREEN_WIDTH // 2
+        result_button.center_y = SCREEN_HEIGHT // 2 - 100
+        self.death_buttons.append(result_button)
 
     def remove_death_buttons(self):
         # Удаляем "кнопки смерти"
@@ -173,6 +187,18 @@ class FishHunterGame(arcade.View):
         # Возвращаемся в главное меню
         from main import FishHunterMenu
         self.window.show_view(FishHunterMenu())
+
+    def save_result_window(self, event=None):
+        conn = sqlite3.connect('../static/record/records.db')
+        cursor = conn.cursor()
+
+        # НЕ указываем id - он сгенерируется автоматически
+        cursor.execute(f'''
+            INSERT INTO results (result)
+            VALUES ({self.score})
+        ''')
+        conn.commit()
+        conn.close()
 
     def collision_with_enemies(self, player, enemies, type):
         # Проверка коллизии с препятствиями (кроме пропастей)
