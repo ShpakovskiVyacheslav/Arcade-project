@@ -183,8 +183,8 @@ class FishHunterGame(arcade.View):
                 player.die()
             elif type == "enemy":
                 for enemy in collision_list:
-                    if player.bottom + 15 <= enemy.top and not self.cheating:
-                        # + 15 из-за того что проверка коллизии происходит каждые 1/60 секуды, а не 0
+                    if player.bottom + 25 <= enemy.top and not self.cheating:
+                        # + 25 из-за того что проверка коллизии происходит каждые 1/60 секуды, а не 0
                         player.die()
                     else:
                         enemy.die()
