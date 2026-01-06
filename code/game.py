@@ -5,6 +5,7 @@ from arcade.gui import UIFlatButton, UIManager
 from character import Player_Potap
 from arcade.camera import Camera2D
 from constants import *
+from styles import *
 from enemies import Enemy
 from arcade.particles import FadeParticle, Emitter, EmitBurst
 
@@ -37,7 +38,7 @@ class FishHunterGame(arcade.View):
         # self.tile_map = arcade.load_tilemap(f"../static/levels/test_buffitems.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
-        # создаем врагов
+        # Создаем врагов
         for i in self.scene["enemies"]:
             enemy = Enemy(self.scene["earth"])
             enemy.position = i.position
@@ -48,62 +49,6 @@ class FishHunterGame(arcade.View):
         # Кнопки (будут показаны при смерти/победе)
         self.buttons = []
         self.victory_mode = False
-
-        # Стиль для кнопок смерти
-        self.death_button_style = {
-            "normal": {
-                "font_name": ("calibri", "arial"),
-                "font_size": 15,
-                "font_color": arcade.color.WHITE,
-                "bg": arcade.color.RED,
-                "border": arcade.color.DARK_RED,
-                "border_width": 2
-            },
-            "hover": {
-                "font_name": ("calibri", "arial"),
-                "font_size": 15,
-                "font_color": arcade.color.RED,
-                "bg": arcade.color.WHITE,
-                "border": arcade.color.DARK_RED,
-                "border_width": 2
-            },
-            "press": {
-                "font_name": ("calibri", "arial"),
-                "font_size": 15,
-                "font_color": arcade.color.RED,
-                "bg": arcade.color.LIGHT_GRAY,
-                "border": arcade.color.DARK_RED,
-                "border_width": 2
-            }
-        }
-
-        # Стиль для кнопок победы
-        self.victory_button_style = {
-            "normal": {
-                "font_name": ("calibri", "arial"),
-                "font_size": 15,
-                "font_color": arcade.color.WHITE,
-                "bg": arcade.color.DARK_BLUE,
-                "border": arcade.color.BLUE,
-                "border_width": 2
-            },
-            "hover": {
-                "font_name": ("calibri", "arial"),
-                "font_size": 15,
-                "font_color": arcade.color.DARK_BLUE,
-                "bg": arcade.color.WHITE,
-                "border": arcade.color.BLUE,
-                "border_width": 2
-            },
-            "press": {
-                "font_name": ("calibri", "arial"),
-                "font_size": 15,
-                "font_color": arcade.color.DARK_BLUE,
-                "bg": arcade.color.LIGHT_BLUE,
-                "border": arcade.color.BLUE,
-                "border_width": 2
-            }
-        }
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             player_sprite=self.player,
@@ -130,14 +75,14 @@ class FishHunterGame(arcade.View):
             self.firework_textures.append(arcade.make_soft_circle_texture(15, color, 255))
 
     def create_buttons(self, victory=False):
-        """Создает кнопки для экрана смерти или победы"""
+        # Создаем кнопки для экрана смерти или победы
         # Очищаем старые кнопки
         for button in self.buttons:
             self.ui_manager.remove(button)
         self.buttons.clear()
 
         # Выбираем стиль в зависимости от режима
-        style = self.victory_button_style if victory else self.death_button_style
+        style = VICTORY_BUTTON_STYLE if victory else DEATH_BUTTON_STYLE
 
         # Кнопка "Начать заново"
         restart_button = UIFlatButton(
@@ -298,7 +243,7 @@ class FishHunterGame(arcade.View):
 
     def collision_with_exit(self, player):
         # Проверка коллизии с выходом (нужно перейти на следующий уровень)
-        # У слоя exit нулевая непрозрачность
+
         collision_list = arcade.check_for_collision_with_list(player, self.scene["exit"])
         if collision_list:
             self.moving_to_next_level()

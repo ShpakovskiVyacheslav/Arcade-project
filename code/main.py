@@ -3,6 +3,7 @@ import sqlite3
 from arcade.gui import UIFlatButton, UIManager
 from game import FishHunterGame
 from constants import *
+from styles import *
 
 
 class FishHunterMenu(arcade.View):
@@ -57,11 +58,11 @@ class FishHunterMenu(arcade.View):
     def quit_game(self, event):
         arcade.exit()
 
+
 class Show_Results(arcade.View):
     def __init__(self):
         super().__init__()
         self.ui_manager = UIManager()
-
 
         self.conn = sqlite3.connect('../static/record/records.db')
         self.cursor = self.conn.cursor()
@@ -104,9 +105,8 @@ class Show_Results(arcade.View):
             y = start_y - row_index * self.row_height
             arcade.draw_line(0, y + 23, 800, y + 23, arcade.color.BLACK_OLIVE, 3)
             arcade.draw_text(str(row[0]),
-                            370, y,
-                            arcade.color.BLACK_OLIVE, 16)
-
+                             370, y,
+                             arcade.color.BLACK_OLIVE, 16)
 
     def on_update(self, delta_time):
         pass

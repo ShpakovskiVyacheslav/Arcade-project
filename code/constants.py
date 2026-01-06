@@ -27,25 +27,3 @@ PARTICLE_COLORS = [
     (255, 99, 71), (255, 127, 80), (255, 165, 0),
     (255, 228, 181), (255, 250, 205), (255, 255, 224)
 ]
-STYLE = {
-            "normal": {
-                "font_name": ("calibri", "arial"),
-                "font_size": 15,
-                "font_color": arcade.color.BLACK_OLIVE,
-                "bg": arcade.color.LIGHT_BLUE,
-                "border": arcade.color.BLACK_OLIVE,
-                "border_width": 2
-            },
-            "hover": {"font_name": ("calibri", "arial"),
-                      "font_size": 15,
-                      "font_color": arcade.color.LIGHT_BLUE,
-                      "bg": arcade.color.BLACK_OLIVE,
-                      "border": arcade.color.BLACK_OLIVE,
-                      "border_width": 2},
-            "press": {"font_name": ("calibri", "arial"),
-                      "font_size": 15,
-                      "font_color": arcade.color.LIGHT_BLUE,
-                      "bg": arcade.color.BLACK_OLIVE,
-                      "border": arcade.color.BLACK_OLIVE,
-                      "border_width": 2}
-        }
