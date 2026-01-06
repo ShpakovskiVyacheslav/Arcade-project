@@ -1,4 +1,5 @@
 import arcade
+import sqlite3
 from arcade.gui import UIFlatButton, UIManager
 from game import FishHunterGame
 from constants import *
@@ -9,42 +10,26 @@ class FishHunterMenu(arcade.View):
         super().__init__()
         self.ui_manager = UIManager()
 
-        style = {
-            "normal": {
-                "font_name": ("calibri", "arial"),
-                "font_size": 15,
-                "font_color": arcade.color.BLACK_OLIVE,
-                "bg": arcade.color.LIGHT_BLUE,
-                "border": arcade.color.BLACK_OLIVE,
-                "border_width": 2
-            },
-            "hover": {"font_name": ("calibri", "arial"),
-                      "font_size": 15,
-                      "font_color": arcade.color.LIGHT_BLUE,
-                      "bg": arcade.color.BLACK_OLIVE,
-                      "border": arcade.color.BLACK_OLIVE,
-                      "border_width": 2},
-            "press": {"font_name": ("calibri", "arial"),
-                      "font_size": 15,
-                      "font_color": arcade.color.LIGHT_BLUE,
-                      "bg": arcade.color.BLACK_OLIVE,
-                      "border": arcade.color.BLACK_OLIVE,
-                      "border_width": 2}
-        }
-
         # Создаем кнопку "Играть"
-        play_button = UIFlatButton(text="Играть", width=300, style=style)
+        play_button = UIFlatButton(text="Играть", width=300, style=STYLE)
         play_button.on_click = self.start_game
         self.ui_manager.add(play_button)
         play_button.center_x = SCREEN_WIDTH // 2
         play_button.center_y = SCREEN_HEIGHT // 2
 
+        # Создаем кнопку с результатами
+        results_button = UIFlatButton(text="Посмотреть результаты", width=300, style=STYLE)
+        results_button.on_click = self.result_score
+        self.ui_manager.add(results_button)
+        results_button.center_x = SCREEN_WIDTH // 2
+        results_button.center_y = SCREEN_HEIGHT // 2 - 50
+
         # Создаем кнопку "Выход"
-        quit_button = UIFlatButton(text="Выход", width=300, style=style)
+        quit_button = UIFlatButton(text="Выход", width=300, style=STYLE)
         quit_button.on_click = self.quit_game
         self.ui_manager.add(quit_button)
         quit_button.center_x = SCREEN_WIDTH // 2
-        quit_button.center_y = SCREEN_HEIGHT // 2 - 50
+        quit_button.center_y = SCREEN_HEIGHT // 2 - 100
 
     def on_show_view(self):
         # Активируем менеджер UI
@@ -65,8 +50,70 @@ class FishHunterMenu(arcade.View):
         # Вызываем экран с игрой
         self.window.show_view(FishHunterGame())
 
+    def result_score(self, event):
+        # Вызываем экран с результатами
+        self.window.show_view(Show_Results())
+
     def quit_game(self, event):
         arcade.exit()
+
+class Show_Results(arcade.View):
+    def __init__(self):
+        super().__init__()
+        self.ui_manager = UIManager()
+
+
+        self.conn = sqlite3.connect('../static/record/records.db')
+        self.cursor = self.conn.cursor()
+        self.data = self.cursor.execute("SELECT result FROM results").fetchall()
+        self.data.sort(key=lambda row: row[0], reverse=True)
+
+        # Для скроллинга
+        self.scroll_y = 0
+        self.row_height = 30
+
+        menu_button = UIFlatButton(text="Обратно в меню", width=300, style=STYLE)
+        menu_button.on_click = self.menu
+        self.ui_manager.add(menu_button)
+        menu_button.center_x = 400
+        menu_button.center_y = 480
+
+    def on_show_view(self):
+        # Активируем менеджер UI
+        self.ui_manager.enable()
+        arcade.set_background_color(arcade.color.LIGHT_BLUE)
+
+    def on_draw(self):
+        self.clear()
+        self.ui_manager.draw()
+
+        arcade.draw_text("Рекорды",
+                         400, 550,
+                         arcade.color.BLACK_OLIVE, 24,
+                         anchor_x="center", bold=True)
+
+        arcade.draw_text("Лучшие результаты",
+                         400, 410,
+                         arcade.color.BLACK_OLIVE, 24,
+                         anchor_x="center", bold=True)
+
+        # Отрисовка данных
+        start_y = 370 - self.scroll_y
+
+        for row_index, row in enumerate(self.data):
+            y = start_y - row_index * self.row_height
+            arcade.draw_line(0, y + 23, 800, y + 23, arcade.color.BLACK_OLIVE, 3)
+            arcade.draw_text(str(row[0]),
+                            370, y,
+                            arcade.color.BLACK_OLIVE, 16)
+
+
+    def on_update(self, delta_time):
+        pass
+
+    def menu(self, event):
+        # Вызываем экран с меню
+        self.window.show_view(FishHunterMenu())
 
 
 def main():
