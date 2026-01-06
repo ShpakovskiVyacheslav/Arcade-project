@@ -87,6 +87,7 @@ class FishHunterGame(arcade.View):
         self.music_enabled = True
 
         self.cheating = False
+        self.rage = False
 
         self.jump_height = 15
 
@@ -192,6 +193,8 @@ class FishHunterGame(arcade.View):
             self.all_sprite.append(enemy)
         self.fireworks.clear()
 
+        self.jump_height = 15
+
     def return_to_menu(self, event=None):
         # Возвращаемся в главное меню
         from main import FishHunterMenu
@@ -218,7 +221,7 @@ class FishHunterGame(arcade.View):
                 player.die()
             elif type == "enemy":
                 for enemy in collision_list:
-                    if player.bottom + 25 <= enemy.top and not self.cheating:
+                    if player.bottom + 25 <= enemy.top and not (self.cheating or self.rage):
                         # + 25 из-за того что проверка коллизии происходит каждые 1/60 секуды, а не 0
                         player.die()
                     else:
@@ -242,13 +245,18 @@ class FishHunterGame(arcade.View):
             if item_name == "fish5":
                 player.speed += SPEED_DELTA_CONST
             if item_name == "fish6":
-                player.scale = 1.4
-                self.cheating = True
-                for buff in self.active_buffs:
-                    if buff[0] == "RAGE":
-                        buff[1] += RAGE_BUFF_DURATION
-                else:
-                    self.active_buffs.append(["RAGE", RAGE_BUFF_DURATION])
+                    player.scale = 1.4
+                    self.rage = True
+                    for buff in self.active_buffs:
+                        if buff[0] == "RAGE":
+                            buff[1] += RAGE_BUFF_DURATION
+                    else:
+                        self.active_buffs.append(["RAGE", RAGE_BUFF_DURATION])
+            # фейерверк
+            if item_name == "fireworks":
+                self.create_firework(self.player.center_x, self.player.center_y + 200)
+
+
 
         for item in collision_list:
             item.remove_from_sprite_lists()
@@ -362,11 +370,12 @@ class FishHunterGame(arcade.View):
     def on_update(self, delta_time):
         # Обновляем только если персонаж жив
         if self.player.alive:
-            if not self.cheating:
+            if not (self.cheating or self.rage):
                 self.collision_with_enemies(self.player, self.scene["spikes"], "spike")
             self.collision_with_enemies(self.player, self.enemies_sprites, "enemy")
             for i in range(1, 9):
                 self.collision_with_items(self.player, f"fish{i}")
+            self.collision_with_items(self.player, "fireworks")
             self.collision_with_exit(self.player)
 
             for i in self.enemies_sprites:
@@ -416,7 +425,7 @@ class FishHunterGame(arcade.View):
                 self.active_buffs.remove(i)
                 if i[0] == "RAGE":
                     self.player.scale = 1
-                    self.cheating = False
+                    self.rage = False
             i[1] -= delta_time
 
     def on_key_press(self, key, modifiers):
@@ -438,10 +447,7 @@ class FishHunterGame(arcade.View):
 
         # Создаем фейерверк
         if key == arcade.key.Q:
-            firework_x = self.player.center_x
-            firework_y = self.player.center_y + 200
-
-            self.create_firework(firework_x, firework_y)
+            self.create_firework(self.player.center_x, self.player.center_y + 200)
 
         if key == arcade.key.P:
             if self.music_enabled:
