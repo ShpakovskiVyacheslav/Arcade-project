@@ -45,11 +45,12 @@ class FishHunterGame(arcade.View):
             self.all_sprite.append(enemy)
         self.score = 0
 
-        # Кнопки (будут показаны при смерти)
-        self.death_buttons = []
+        # Кнопки (будут показаны при смерти/победе)
+        self.buttons = []
+        self.victory_mode = False
 
-        # Стиль для кнопок
-        self.button_style = {
+        # Стиль для кнопок смерти
+        self.death_button_style = {
             "normal": {
                 "font_name": ("calibri", "arial"),
                 "font_size": 15,
@@ -76,6 +77,34 @@ class FishHunterGame(arcade.View):
             }
         }
 
+        # Стиль для кнопок победы
+        self.victory_button_style = {
+            "normal": {
+                "font_name": ("calibri", "arial"),
+                "font_size": 15,
+                "font_color": arcade.color.WHITE,
+                "bg": arcade.color.DARK_BLUE,
+                "border": arcade.color.BLUE,
+                "border_width": 2
+            },
+            "hover": {
+                "font_name": ("calibri", "arial"),
+                "font_size": 15,
+                "font_color": arcade.color.DARK_BLUE,
+                "bg": arcade.color.WHITE,
+                "border": arcade.color.BLUE,
+                "border_width": 2
+            },
+            "press": {
+                "font_name": ("calibri", "arial"),
+                "font_size": 15,
+                "font_color": arcade.color.DARK_BLUE,
+                "bg": arcade.color.LIGHT_BLUE,
+                "border": arcade.color.BLUE,
+                "border_width": 2
+            }
+        }
+
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             player_sprite=self.player,
             platforms=self.scene["earth"],
@@ -96,60 +125,63 @@ class FishHunterGame(arcade.View):
         self.fireworks = []
         self.firework_textures = []
 
+        # Создаем текстуры для фейерверков
         for color in PARTICLE_COLORS:
             self.firework_textures.append(arcade.make_soft_circle_texture(15, color, 255))
 
-    def create_death_buttons(self):
-        # Создаем "кнопки смерти"
+    def create_buttons(self, victory=False):
+        """Создает кнопки для экрана смерти или победы"""
         # Очищаем старые кнопки
-        for button in self.death_buttons:
+        for button in self.buttons:
             self.ui_manager.remove(button)
-        self.death_buttons.clear()
+        self.buttons.clear()
+
+        # Выбираем стиль в зависимости от режима
+        style = self.victory_button_style if victory else self.death_button_style
 
         # Кнопка "Начать заново"
         restart_button = UIFlatButton(
             text="Начать заново",
             width=200,
             height=40,
-            style=self.button_style
+            style=style
         )
         restart_button.on_click = self.restart_game
         self.ui_manager.add(restart_button)
         restart_button.center_x = SCREEN_WIDTH // 2
         restart_button.center_y = SCREEN_HEIGHT // 2 - 40
-        self.death_buttons.append(restart_button)
+        self.buttons.append(restart_button)
 
         # Кнопка "Вернуться в меню"
         menu_button = UIFlatButton(
             text="Вернуться в меню",
             width=200,
             height=40,
-            style=self.button_style
+            style=style
         )
         menu_button.on_click = self.return_to_menu
         self.ui_manager.add(menu_button)
         menu_button.center_x = SCREEN_WIDTH // 2
         menu_button.center_y = SCREEN_HEIGHT // 2 - 150
-        self.death_buttons.append(menu_button)
+        self.buttons.append(menu_button)
 
         # Кнопка с результатом
         result_button = UIFlatButton(
             text="Сохранить результат",
             width=200,
             height=40,
-            style=self.button_style
+            style=style
         )
         result_button.on_click = self.save_result_window
         self.ui_manager.add(result_button)
         result_button.center_x = SCREEN_WIDTH // 2
         result_button.center_y = SCREEN_HEIGHT // 2 - 100
-        self.death_buttons.append(result_button)
+        self.buttons.append(result_button)
 
-    def remove_death_buttons(self):
-        # Удаляем "кнопки смерти"
-        for button in self.death_buttons:
+    def remove_buttons(self):
+        for button in self.buttons:
             self.ui_manager.remove(button)
-        self.death_buttons.clear()
+        self.buttons.clear()
 
     def restart_game(self, event=None):
         # Начинаем игру сначала
@@ -158,7 +190,7 @@ class FishHunterGame(arcade.View):
 
         self.score = 0
 
-        self.remove_death_buttons()
+        self.remove_buttons()
 
         # Восстанавливаем игрока
         self.player = Player_Potap()
@@ -186,6 +218,7 @@ class FishHunterGame(arcade.View):
         if self.music_enabled:
             self.music_player = arcade.play_sound(self.music, loop=True, volume=VOLUME)
 
+        # Создаем врагов
         for i in self.scene["enemies"]:
             enemy = Enemy(self.scene["earth"])
             enemy.position = i.position
@@ -194,6 +227,10 @@ class FishHunterGame(arcade.View):
         self.fireworks.clear()
 
         self.jump_height = 15
+        self.rage = False
+        self.cheating = False
+        self.active_buffs.clear()
+        self.victory_mode = False
 
     def return_to_menu(self, event=None):
         # Возвращаемся в главное меню
@@ -245,18 +282,16 @@ class FishHunterGame(arcade.View):
             if item_name == "fish5":
                 player.speed += SPEED_DELTA_CONST
             if item_name == "fish6":
-                    player.scale = 1.4
-                    self.rage = True
-                    for buff in self.active_buffs:
-                        if buff[0] == "RAGE":
-                            buff[1] += RAGE_BUFF_DURATION
-                    else:
-                        self.active_buffs.append(["RAGE", RAGE_BUFF_DURATION])
+                player.scale = 1.4
+                self.rage = True
+                for buff in self.active_buffs:
+                    if buff[0] == "RAGE":
+                        buff[1] += RAGE_BUFF_DURATION
+                else:
+                    self.active_buffs.append(["RAGE", RAGE_BUFF_DURATION])
             # фейерверк
             if item_name == "fireworks":
                 self.create_firework(self.player.center_x, self.player.center_y + 200)
-
-
 
         for item in collision_list:
             item.remove_from_sprite_lists()
@@ -269,25 +304,40 @@ class FishHunterGame(arcade.View):
             self.moving_to_next_level()
 
     def moving_to_next_level(self):
-        self.all_sprite.clear()
-        self.enemies_sprites.clear()
-        self.level += 1
-        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
-        self.scene = arcade.Scene.from_tilemap(self.tile_map)
-        for i in self.scene["enemies"]:
-            enemy = Enemy(self.scene["earth"])
-            enemy.position = i.position
-            self.enemies_sprites.append(enemy)
-            self.all_sprite.append(enemy)
-        self.player.die()
-        self.player = Player_Potap()
-        self.all_sprite.append(self.player)
-        self.physics_engine = arcade.PhysicsEnginePlatformer(
-            player_sprite=self.player,
-            platforms=self.scene["earth"],
-            gravity_constant=GRAVITY
-        )
-        self.fireworks.clear()
+        next_level = self.level + 1
+        try:
+            test_map = arcade.load_tilemap(f"../static/levels/level{next_level}.tmx", scaling=TILE_SCALING)
+            self.all_sprite.clear()
+            self.enemies_sprites.clear()
+            self.level = next_level
+            self.tile_map = test_map
+            self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
+            # Создаем врагов для нового уровня
+            for i in self.scene["enemies"]:
+                enemy = Enemy(self.scene["earth"])
+                enemy.position = i.position
+                self.enemies_sprites.append(enemy)
+                self.all_sprite.append(enemy)
+
+            self.player.die()
+            self.player = Player_Potap()
+            self.all_sprite.append(self.player)
+            self.physics_engine = arcade.PhysicsEnginePlatformer(
+                player_sprite=self.player,
+                platforms=self.scene["earth"],
+                gravity_constant=GRAVITY
+            )
+            self.fireworks.clear()
+
+        except Exception:
+            self.show_victory_screen()
+
+    def show_victory_screen(self):
+        self.player.alive = False
+        self.victory_mode = True
+        arcade.stop_sound(self.music_player)
+        self.create_buttons(victory=True)
 
     def create_firework(self, x, y):
         for i in range(10):
@@ -337,14 +387,21 @@ class FishHunterGame(arcade.View):
             bold=True
         )
 
-        # Если персонаж мертв - рисуем экран смерти
+        # Если персонаж мертв - рисуем экран смерти или победы
         if not self.player.alive:
-            # Сообщение о смерти
+            if self.victory_mode:
+                title = "ВЫ ПОБЕДИЛИ!"
+                color = arcade.color.GOLD
+            else:
+                title = "ВЫ УМЕРЛИ"
+                color = arcade.color.RED
+
+            # Сообщение о смерти/победе
             arcade.draw_text(
-                "ВЫ УМЕРЛИ",
+                title,
                 SCREEN_WIDTH // 2,
                 SCREEN_HEIGHT // 2 + 80,
-                arcade.color.RED,
+                color,
                 48,
                 anchor_x="center",
                 anchor_y="center",
@@ -364,8 +421,8 @@ class FishHunterGame(arcade.View):
             )
 
             # Создаем кнопки, если их еще нет
-            if not self.death_buttons:
-                self.create_death_buttons()
+            if not self.buttons:
+                self.create_buttons(victory=self.victory_mode)
 
     def on_update(self, delta_time):
         # Обновляем только если персонаж жив
@@ -420,6 +477,7 @@ class FishHunterGame(arcade.View):
 
         self.gui_camera.position = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
+        # Обновляем активные баффы
         for i in self.active_buffs:
             if i[1] <= 0:
                 self.active_buffs.remove(i)
@@ -449,6 +507,7 @@ class FishHunterGame(arcade.View):
         if key == arcade.key.Q:
             self.create_firework(self.player.center_x, self.player.center_y + 200)
 
+        # Управление музыкой
         if key == arcade.key.P:
             if self.music_enabled:
                 self.music_enabled = False
