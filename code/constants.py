@@ -1,3 +1,4 @@
+import arcade
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 PLATFORM_TOP = 60
@@ -16,3 +17,25 @@ SMALL_JUMP_HEIGHT = 12
 SPEED_DELTA_CONST = 1
 RAGE_SCALE = 0.4
 RAGE_BUFF_DURATION = 5
+STYLE = {
+            "normal": {
+                "font_name": ("calibri", "arial"),
+                "font_size": 15,
+                "font_color": arcade.color.BLACK_OLIVE,
+                "bg": arcade.color.LIGHT_BLUE,
+                "border": arcade.color.BLACK_OLIVE,
+                "border_width": 2
+            },
+            "hover": {"font_name": ("calibri", "arial"),
+                      "font_size": 15,
+                      "font_color": arcade.color.LIGHT_BLUE,
+                      "bg": arcade.color.BLACK_OLIVE,
+                      "border": arcade.color.BLACK_OLIVE,
+                      "border_width": 2},
+            "press": {"font_name": ("calibri", "arial"),
+                      "font_size": 15,
+                      "font_color": arcade.color.LIGHT_BLUE,
+                      "bg": arcade.color.BLACK_OLIVE,
+                      "border": arcade.color.BLACK_OLIVE,
+                      "border_width": 2}
+        }
