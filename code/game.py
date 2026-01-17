@@ -62,6 +62,7 @@ class FishHunterGame(arcade.View):
 
         self.cheating = False
         self.rage = False
+        self.check_saving = True
 
         self.jump_height = 15
 
@@ -174,6 +175,7 @@ class FishHunterGame(arcade.View):
         self.jump_height = 15
         self.rage = False
         self.cheating = False
+        self.check_saving = True
         self.active_buffs.clear()
         self.victory_mode = False
 
@@ -183,16 +185,18 @@ class FishHunterGame(arcade.View):
         self.window.show_view(FishHunterMenu())
 
     def save_result_window(self, event=None):
-        conn = sqlite3.connect('../static/record/records.db')
-        cursor = conn.cursor()
+        if self.check_saving:
+            conn = sqlite3.connect('../static/record/records.db')
+            cursor = conn.cursor()
 
-        # НЕ указываем id - он сгенерируется автоматически
-        cursor.execute(f'''
-            INSERT INTO results (result)
-            VALUES ({self.score})
-        ''')
-        conn.commit()
-        conn.close()
+            # НЕ указываем id - он сгенерируется автоматически
+            cursor.execute(f'''
+                INSERT INTO results (result)
+                VALUES ({self.score})
+            ''')
+            conn.commit()
+            conn.close()
+            self.check_saving = False
 
     def collision_with_enemies(self, player, enemies, type):
         # Проверка коллизии с препятствиями (кроме пропастей)
