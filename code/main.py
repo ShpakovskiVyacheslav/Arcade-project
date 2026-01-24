@@ -11,10 +11,10 @@ class FishHunterMenu(arcade.View):
         super().__init__()
         self.ui_manager = UIManager()
 
-        button_parameters = [("Играть", self.start_game), ("Посмотреть результаты", self.result_score),
+        button_parameters = [("Играть", self.start_game), ("Посмотреть результаты", self.result_score), ("Управление", self.keyboard),
                              ("Выход", self.quit_game)]
 
-        for i in range(3):
+        for i in range(4):
             button = UIFlatButton(
                 text=button_parameters[i][0],
                 width=300,
@@ -47,6 +47,9 @@ class FishHunterMenu(arcade.View):
     def result_score(self, event):
         # Вызываем экран с результатами
         self.window.show_view(ShowResults())
+
+    def keyboard(self, event):
+        self.window.show_view(Keyboard())
 
     def quit_game(self, event):
         arcade.exit()
@@ -100,6 +103,47 @@ class ShowResults(arcade.View):
             arcade.draw_text(str(row[0]),
                              370, y,
                              arcade.color.BLACK_OLIVE, 16)
+
+    def on_update(self, delta_time):
+        pass
+
+    def menu(self, event):
+        # Вызываем экран с меню
+        self.window.show_view(FishHunterMenu())
+
+class Keyboard(arcade.View):
+    def __init__(self):
+        super().__init__()
+        self.ui_manager = UIManager()
+
+        # Для скроллинга
+        self.scroll_y = 0
+        self.row_height = 30
+
+        self.text = ['A или LEFT - Налево', 'D или RIGHT - Направо', 'W или UP - Низкий прыжок',
+                     'Space - Высокий прыжок', 'Q - создать фейерверк', 'P - Включить или выключить музыку']
+
+        menu_button = UIFlatButton(text="Обратно в меню", width=300, style=STYLE)
+        menu_button.on_click = self.menu
+        self.ui_manager.add(menu_button)
+        menu_button.center_x = 400
+        menu_button.center_y = 480
+
+    def on_show_view(self):
+        # Активируем менеджер UI
+        self.ui_manager.enable()
+        arcade.set_background_color(arcade.color.LIGHT_BLUE)
+
+    def on_draw(self):
+        self.clear()
+        self.ui_manager.draw()
+
+        for row_index, row in enumerate(self.text):
+            y = 370 - row_index * self.row_height
+            arcade.draw_text(row,
+                         400, y,
+                         arcade.color.BLACK_OLIVE, 24,
+                         anchor_x="center", bold=True)
 
     def on_update(self, delta_time):
         pass
