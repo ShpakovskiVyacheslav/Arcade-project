@@ -1,22 +1,38 @@
 import arcade
+
+# РАЗМЕРЫ ЭКРАНА
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-PLATFORM_TOP = 60
 SCREEN_TITLE = "Fish_hunter"
-CAMERA_LERP = 0.12
+
+# ФИЗИКА
 GRAVITY = 0.5
 TILE_SCALING = 1
+PLATFORM_TOP = 60
+
+# КАМЕРА
+CAMERA_LERP = 0.12
+
+# ПАРАМЕТРЫ МИРОВ (ширина, высота)
 WORLD_PARAMETRS = {
     "level1": (3150, 1200),
     "level2": (4200, 1200),
     "level3": (4200, 2500)
 }
+
+# ЗВУК
 VOLUME = 0.1
+
+# БАФФЫ И ПРЕДМЕТЫ
 BIG_JUMP_DELTA_CONST = 2
 SMALL_JUMP_HEIGHT = 12
 SPEED_DELTA_CONST = 1
+
+# РЕЖИМ ЯРОСТИ
 RAGE_SCALE = 0.4
 RAGE_BUFF_DURATION = 5
+
+# ЦВЕТА ДЛЯ ЧАСТИЦ ФЕЙЕРВЕРКА
 PARTICLE_COLORS = [
     (255, 0, 0), (255, 69, 0), (255, 140, 0),
     (255, 215, 0), (255, 255, 0), (255, 20, 147),

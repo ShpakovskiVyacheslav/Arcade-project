@@ -11,26 +11,19 @@ class FishHunterMenu(arcade.View):
         super().__init__()
         self.ui_manager = UIManager()
 
-        # Создаем кнопку "Играть"
-        play_button = UIFlatButton(text="Играть", width=300, style=STYLE)
-        play_button.on_click = self.start_game
-        self.ui_manager.add(play_button)
-        play_button.center_x = SCREEN_WIDTH // 2
-        play_button.center_y = SCREEN_HEIGHT // 2
+        button_parameters = [("Играть", self.start_game), ("Посмотреть результаты", self.result_score),
+                             ("Выход", self.quit_game)]
 
-        # Создаем кнопку с результатами
-        results_button = UIFlatButton(text="Посмотреть результаты", width=300, style=STYLE)
-        results_button.on_click = self.result_score
-        self.ui_manager.add(results_button)
-        results_button.center_x = SCREEN_WIDTH // 2
-        results_button.center_y = SCREEN_HEIGHT // 2 - 50
-
-        # Создаем кнопку "Выход"
-        quit_button = UIFlatButton(text="Выход", width=300, style=STYLE)
-        quit_button.on_click = self.quit_game
-        self.ui_manager.add(quit_button)
-        quit_button.center_x = SCREEN_WIDTH // 2
-        quit_button.center_y = SCREEN_HEIGHT // 2 - 100
+        for i in range(3):
+            button = UIFlatButton(
+                text=button_parameters[i][0],
+                width=300,
+                style=STYLE
+            )
+            button.on_click = button_parameters[i][1]
+            self.ui_manager.add(button)
+            button.center_x = SCREEN_WIDTH // 2
+            button.center_y = SCREEN_HEIGHT // 2 - i * 50
 
     def on_show_view(self):
         # Активируем менеджер UI
@@ -53,18 +46,18 @@ class FishHunterMenu(arcade.View):
 
     def result_score(self, event):
         # Вызываем экран с результатами
-        self.window.show_view(Show_Results())
+        self.window.show_view(ShowResults())
 
     def quit_game(self, event):
         arcade.exit()
 
 
-class Show_Results(arcade.View):
+class ShowResults(arcade.View):
     def __init__(self):
         super().__init__()
         self.ui_manager = UIManager()
 
-        self.conn = sqlite3.connect('../static/record/records.db')
+        self.conn = sqlite3.connect('../for_database/records.sqlite')
         self.cursor = self.conn.cursor()
         self.data = self.cursor.execute("SELECT result FROM results").fetchall()
         self.data.sort(key=lambda row: row[0], reverse=True)

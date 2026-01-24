@@ -75,6 +75,23 @@ class FishHunterGame(arcade.View):
         for color in PARTICLE_COLORS:
             self.firework_textures.append(arcade.make_soft_circle_texture(15, color, 255))
 
+        self.items = {
+            # Рыбы, дающие очки
+            "fish1": lambda: setattr(self, 'score', self.score + 100),
+            "fish3": lambda: setattr(self, 'score', self.score + 200),
+            "fish4": lambda: setattr(self, 'score', self.score + 500),
+
+            # Рыбы, дающие бафф
+            "fish2": lambda: setattr(self, 'jump_height', self.jump_height + BIG_JUMP_DELTA_CONST),
+            "fish5": lambda: setattr(self.player, 'speed', self.player.speed + SPEED_DELTA_CONST),
+
+            # Особый обработчик для fish6 с дополнительной логикой
+            "fish6": lambda: self._apply_active_buff(self.player),
+
+            # Фейерверк
+            "fireworks": lambda: self.create_firework(self.player.center_x, self.player.center_y + 200)
+        }
+
     def create_buttons(self, victory=False):
         # Создаем кнопки для экрана смерти или победы
         # Очищаем старые кнопки
@@ -85,44 +102,21 @@ class FishHunterGame(arcade.View):
         # Выбираем стиль в зависимости от режима
         style = VICTORY_BUTTON_STYLE if victory else DEATH_BUTTON_STYLE
 
-        # Кнопка "Начать заново"
-        restart_button = UIFlatButton(
-            text="Начать заново",
-            width=200,
-            height=40,
-            style=style
-        )
-        restart_button.on_click = self.restart_game
-        self.ui_manager.add(restart_button)
-        restart_button.center_x = SCREEN_WIDTH // 2
-        restart_button.center_y = SCREEN_HEIGHT // 2 - 40
-        self.buttons.append(restart_button)
+        button_parameters = [("Начать заново", self.restart_game), ("Сохранить результат", self.save_result_window)
+            , ("Вернуться в меню", self.return_to_menu)]
 
-        # Кнопка "Вернуться в меню"
-        menu_button = UIFlatButton(
-            text="Вернуться в меню",
-            width=200,
-            height=40,
-            style=style
-        )
-        menu_button.on_click = self.return_to_menu
-        self.ui_manager.add(menu_button)
-        menu_button.center_x = SCREEN_WIDTH // 2
-        menu_button.center_y = SCREEN_HEIGHT // 2 - 150
-        self.buttons.append(menu_button)
-
-        # Кнопка с результатом
-        result_button = UIFlatButton(
-            text="Сохранить результат",
-            width=200,
-            height=40,
-            style=style
-        )
-        result_button.on_click = self.save_result_window
-        self.ui_manager.add(result_button)
-        result_button.center_x = SCREEN_WIDTH // 2
-        result_button.center_y = SCREEN_HEIGHT // 2 - 100
-        self.buttons.append(result_button)
+        for i in range(3):
+            button = UIFlatButton(
+                text=button_parameters[i][0],
+                width=200,
+                height=40,
+                style=style
+            )
+            button.on_click = button_parameters[i][1]
+            self.ui_manager.add(button)
+            button.center_x = SCREEN_WIDTH // 2
+            button.center_y = SCREEN_HEIGHT // 2 - i * 50 - 50
+            self.buttons.append(button)
 
     def remove_buttons(self):
         for button in self.buttons:
@@ -186,7 +180,7 @@ class FishHunterGame(arcade.View):
 
     def save_result_window(self, event=None):
         if self.check_saving:
-            conn = sqlite3.connect('../static/record/records.db')
+            conn = sqlite3.connect('../for_database/records.sqlite')
             cursor = conn.cursor()
 
             # НЕ указываем id - он сгенерируется автоматически
@@ -217,33 +211,32 @@ class FishHunterGame(arcade.View):
     def collision_with_items(self, player, item_name):
         # Проверка коллизии с предметами
         collision_list = arcade.check_for_collision_with_list(player, self.scene[item_name])
-        if collision_list:
-            # Рыбы, дающий очки
-            if item_name == "fish1":
-                self.score += 100
-            if item_name == "fish3":
-                self.score += 200
-            if item_name == "fish4":
-                self.score += 500
-            # Рыбы, дающие бафф
-            if item_name == "fish2":
-                self.jump_height += BIG_JUMP_DELTA_CONST
-            if item_name == "fish5":
-                player.speed += SPEED_DELTA_CONST
-            if item_name == "fish6":
-                player.scale = 1.4
-                self.rage = True
-                for buff in self.active_buffs:
-                    if buff[0] == "RAGE":
-                        buff[1] += RAGE_BUFF_DURATION
-                else:
-                    self.active_buffs.append(["RAGE", RAGE_BUFF_DURATION])
-            # фейерверк
-            if item_name == "fireworks":
-                self.create_firework(self.player.center_x, self.player.center_y + 200)
 
-        for item in collision_list:
-            item.remove_from_sprite_lists()
+        if collision_list:
+            item = self.items.get(item_name)
+            if item:
+                item()
+
+            # Удаляем все столкнувшиеся предметы
+            for item in collision_list:
+                item.remove_from_sprite_lists()
+
+            for item in collision_list:
+                item.remove_from_sprite_lists()
+
+    def _apply_active_buff(self, player):
+        # Вспомогательная функция для обработки актиыных баффов
+        player.scale = 1.4
+        self.rage = True
+
+        # Ищем существующий бафф RAGE
+        for buff in self.active_buffs:
+            if buff[0] == "RAGE":
+                buff[1] += RAGE_BUFF_DURATION
+                break
+        else:
+            # Если бафф не найден, добавляем новый
+            self.active_buffs.append(["RAGE", RAGE_BUFF_DURATION])
 
     def collision_with_exit(self, player):
         # Проверка коллизии с выходом (нужно перейти на следующий уровень)
