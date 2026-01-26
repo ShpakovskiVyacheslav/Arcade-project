@@ -34,9 +34,9 @@ class Player_Potap(arcade.Sprite):
         self.center_y = 400  # Над платформой
 
         # ЗАГРУЗКА ТЕКСТУР
-        self._load_textures()
+        self.load_textures()
 
-    def _load_textures(self):
+    def load_textures(self):
         """Загружает все текстуры персонажа."""
         # Текстура покоя
         self.idle_texture = arcade.load_texture("../static/images/cat/Cat_stand.png")
@@ -61,17 +61,17 @@ class Player_Potap(arcade.Sprite):
 
         # Анимация прыжка
         if self.is_jumping:
-            self._update_jump_animation()
+            self.update_jump_animation()
 
         # Анимация ходьбы
         elif self.is_walking:
-            self._update_walk_animation(delta_time)
+            self.update_walk_animation(delta_time)
 
         # Анимация покоя
         else:
-            self._update_idle_animation()
+            self.update_idle_animation()
 
-    def _update_jump_animation(self):
+    def update_jump_animation(self):
         """Обновление анимации прыжка."""
         # Определяем индекс текстуры в зависимости от скорости по Y
         if self.change_y > 10:
@@ -93,7 +93,7 @@ class Player_Potap(arcade.Sprite):
         else:
             self.texture = self.jump_textures[texture_index].flip_horizontally()
 
-    def _update_walk_animation(self, delta_time):
+    def update_walk_animation(self, delta_time):
         """Обновление анимации ходьбы."""
         self.texture_change_time += delta_time
 
@@ -111,7 +111,7 @@ class Player_Potap(arcade.Sprite):
                 flipped_texture = self.walk_textures[self.x_frame_animation].flip_horizontally()
                 self.texture = flipped_texture
 
-    def _update_idle_animation(self):
+    def update_idle_animation(self):
         """Обновление анимации покоя."""
         if self.face_direction:
             self.texture = self.idle_texture

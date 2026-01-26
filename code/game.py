@@ -1,4 +1,3 @@
-import arcade
 import sqlite3
 import random
 from arcade.gui import UIFlatButton, UIManager
@@ -35,7 +34,6 @@ class FishHunterGame(arcade.View):
 
         self.level = 1
         self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
-        # self.tile_map = arcade.load_tilemap(f"../static/levels/test_buffitems.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         # Создаем врагов
@@ -86,7 +84,7 @@ class FishHunterGame(arcade.View):
             "fish5": lambda: setattr(self.player, 'speed', self.player.speed + SPEED_DELTA_CONST),
 
             # Особый обработчик для fish6 с дополнительной логикой
-            "fish6": lambda: self._apply_active_buff(self.player),
+            "fish6": lambda: self.apply_active_buff(self.player),
 
             # Фейерверк
             "fireworks": lambda: self.create_firework(self.player.center_x, self.player.center_y + 200)
@@ -102,8 +100,8 @@ class FishHunterGame(arcade.View):
         # Выбираем стиль в зависимости от режима
         style = VICTORY_BUTTON_STYLE if victory else DEATH_BUTTON_STYLE
 
-        button_parameters = [("Начать заново", self.restart_game), ("Сохранить результат", self.save_result_window)
-            , ("Вернуться в меню", self.return_to_menu)]
+        button_parameters = [("Начать заново", self.restart_game), ("Сохранить результат", self.save_result_window),
+                             ("Вернуться в меню", self.return_to_menu)]
 
         for i in range(3):
             button = UIFlatButton(
@@ -224,7 +222,7 @@ class FishHunterGame(arcade.View):
             for item in collision_list:
                 item.remove_from_sprite_lists()
 
-    def _apply_active_buff(self, player):
+    def apply_active_buff(self, player):
         # Вспомогательная функция для обработки актиыных баффов
         player.scale = 1.4
         self.rage = True
