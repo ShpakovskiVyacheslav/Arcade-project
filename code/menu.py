@@ -283,6 +283,7 @@ class Setting(arcade.View):
                 CONTROLS["firework"] = key
             elif self.check_music:
                 CONTROLS["music"] = key
+            self.key_error = False
         else:
             self.key_error = True
         self.all_false()
