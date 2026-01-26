@@ -3,6 +3,9 @@ import sqlite3
 from game import FishHunterGame
 from constants import *
 from styles import *
+from functions import *
+
+path_db = get_database_path()
 
 
 class FishHunterMenu(arcade.View):
@@ -60,7 +63,7 @@ class ShowResults(arcade.View):
         super().__init__()
         self.ui_manager = UIManager()
 
-        self.conn = sqlite3.connect('../for_database/records.sqlite')
+        self.conn = sqlite3.connect(path_db)
         self.cursor = self.conn.cursor()
         self.data = self.cursor.execute("SELECT result FROM results").fetchall()
         self.data.sort(key=lambda row: row[0], reverse=True)

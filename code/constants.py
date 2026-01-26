@@ -1,3 +1,4 @@
+from functions import *
 # РАЗМЕРЫ ЭКРАНА
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -41,3 +42,6 @@ PARTICLE_COLORS = [
     (255, 99, 71), (255, 127, 80), (255, 165, 0),
     (255, 228, 181), (255, 250, 205), (255, 255, 224)
 ]
+
+# Путь до БД
+path_db = get_database_path()
