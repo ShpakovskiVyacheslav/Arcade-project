@@ -10,7 +10,7 @@ from arcade.particles import FadeParticle, Emitter, EmitBurst
 
 
 class FishHunterGame(arcade.View):
-    def __init__(self):
+    def __init__(self, CONTROLS):
         super().__init__()
         arcade.set_background_color(arcade.color.LIGHT_BLUE)
         self.world_camera = Camera2D()
@@ -35,6 +35,8 @@ class FishHunterGame(arcade.View):
         self.level = 1
         self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
+        self.CONTROLS = CONTROLS
 
         # Создаем врагов
         for i in self.scene["enemies"]:
@@ -431,24 +433,24 @@ class FishHunterGame(arcade.View):
         if not self.player.alive:
             return
 
-        if key == arcade.key.LEFT or key == arcade.key.A:
+        if key == self.CONTROLS["move_left"]:
             self.left_pressed = True
-        elif key == arcade.key.RIGHT or key == arcade.key.D:
+        elif key == self.CONTROLS["move_right"]:
             self.right_pressed = True
-        elif key == arcade.key.SPACE and (self.physics_engine.can_jump(y_distance=1) or self.cheating):
+        elif key == self.CONTROLS["jump_high"] and (self.physics_engine.can_jump(y_distance=1) or self.cheating):
             self.player.jump()
             self.physics_engine.jump(self.jump_height)
-        elif (key == arcade.key.UP or key == arcade.key.W) and (
+        elif key == self.CONTROLS["jump_low"] and (
                 self.physics_engine.can_jump(y_distance=1) or self.cheating):
             self.player.jump()
             self.physics_engine.jump(SMALL_JUMP_HEIGHT)
 
         # Создаем фейерверк
-        if key == arcade.key.Q:
+        if key == self.CONTROLS["firework"]:
             self.create_firework(self.player.center_x, self.player.center_y + 200)
 
         # Управление музыкой
-        if key == arcade.key.P:
+        if key == self.CONTROLS["music"]:
             if self.music_enabled:
                 self.music_enabled = False
                 arcade.stop_sound(self.music_player)
@@ -457,7 +459,7 @@ class FishHunterGame(arcade.View):
                 self.music_player = arcade.play_sound(self.music, loop=True, volume=VOLUME)
 
         # Для отладки (дебага)
-        if key == arcade.key.T:
+        if key == self.CONTROLS["debug"]:
             if not self.cheating:
                 self.cheating = True
             else:
@@ -468,9 +470,9 @@ class FishHunterGame(arcade.View):
         if not self.player.alive:
             return
 
-        if key == arcade.key.LEFT or key == arcade.key.A:
+        if key == self.CONTROLS["move_left"]:
             self.left_pressed = False
-        elif key == arcade.key.RIGHT or key == arcade.key.D:
+        elif key == self.CONTROLS["move_right"]:
             self.right_pressed = False
 
     def on_hide_view(self):
