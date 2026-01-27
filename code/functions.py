@@ -11,7 +11,7 @@ def resource_path(relative_path):
 
 def get_database_path():
     # функция получения пути до базы данных
-    resource_db_path = resource_path("For_database/records.sqlite")
+    resource_db_path = resource_path("for_database/records.sqlite")
 
     if not getattr(sys, "_MEIPASS", None):
         return resource_db_path

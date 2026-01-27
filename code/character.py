@@ -1,7 +1,8 @@
 import arcade
+from functions import resource_path
 
 
-class Player_Potap(arcade.Sprite):
+class PlayerPotap(arcade.Sprite):
     def __init__(self):
         super().__init__()
 
@@ -39,20 +40,20 @@ class Player_Potap(arcade.Sprite):
     def load_textures(self):
         """Загружает все текстуры персонажа."""
         # Текстура покоя
-        self.idle_texture = arcade.load_texture("../static/images/cat/Cat_stand.png")
+        self.idle_texture = arcade.load_texture(resource_path("static/images/cat/Cat_stand.png"))
         self.texture = self.idle_texture
 
         # Текстуры ходьбы (3 кадра)
         self.walk_textures = []
         for frame_num in range(3):
-            texture_path = f"../static/images/cat/Cat_sprint_{frame_num}.png"
+            texture_path = resource_path(f"static/images/cat/Cat_sprint_{frame_num}.png")
             texture = arcade.load_texture(texture_path)
             self.walk_textures.append(texture)
 
         # Текстуры прыжка (6 кадров)
         self.jump_textures = []
         for frame_num in range(6):
-            texture_path = f"../static/images/cat/Cat_jump_{frame_num}.png"
+            texture_path = resource_path(f"static/images/cat/Cat_jump_{frame_num}.png")
             texture = arcade.load_texture(texture_path)
             self.jump_textures.append(texture)
 

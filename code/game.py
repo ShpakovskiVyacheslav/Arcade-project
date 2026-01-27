@@ -1,12 +1,13 @@
 import sqlite3
 import random
 from arcade.gui import UIFlatButton, UIManager
-from character import Player_Potap
+from character import PlayerPotap
 from arcade.camera import Camera2D
 from constants import *
 from styles import *
 from enemies import Enemy
 from arcade.particles import FadeParticle, Emitter, EmitBurst
+from functions import resource_path, get_database_path
 
 
 class FishHunterGame(arcade.View):
@@ -22,7 +23,7 @@ class FishHunterGame(arcade.View):
 
         # Создаем игрока
         self.all_sprite = arcade.SpriteList()
-        self.player = Player_Potap()
+        self.player = PlayerPotap()
         self.all_sprite.append(self.player)
 
         # Создаем список врагов
@@ -33,7 +34,7 @@ class FishHunterGame(arcade.View):
         self.right_pressed = False
 
         self.level = 1
-        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
+        self.tile_map = arcade.load_tilemap(resource_path(f"static/levels/level{self.level}.tmx"), scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         self.CONTROLS = CONTROLS
@@ -56,7 +57,7 @@ class FishHunterGame(arcade.View):
             gravity_constant=GRAVITY
         )
 
-        self.music = arcade.load_sound("../static/sounds/background music.mp3")
+        self.music = arcade.load_sound(resource_path("static/sounds/background music.mp3"))
         self.music_player = arcade.play_sound(self.music, loop=True, volume=VOLUME)
         self.music_enabled = True
 
@@ -133,11 +134,11 @@ class FishHunterGame(arcade.View):
         self.remove_buttons()
 
         # Восстанавливаем игрока
-        self.player = Player_Potap()
+        self.player = PlayerPotap()
         self.all_sprite.append(self.player)
 
         self.level = 1
-        self.tile_map = arcade.load_tilemap(f"../static/levels/level{self.level}.tmx", scaling=TILE_SCALING)
+        self.tile_map = arcade.load_tilemap(resource_path(f"static/levels/level{self.level}.tmx"), scaling=TILE_SCALING)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         # Обновляем физический движок с новым игроком
@@ -180,7 +181,7 @@ class FishHunterGame(arcade.View):
 
     def save_result_window(self, event=None):
         if self.check_saving:
-            conn = sqlite3.connect('../for_database/records.sqlite')
+            conn = sqlite3.connect(get_database_path())
             cursor = conn.cursor()
 
             # НЕ указываем id - он сгенерируется автоматически
@@ -263,7 +264,7 @@ class FishHunterGame(arcade.View):
                 self.all_sprite.append(enemy)
 
             self.player.die()
-            self.player = Player_Potap()
+            self.player = PlayerPotap()
             self.all_sprite.append(self.player)
             self.physics_engine = arcade.PhysicsEnginePlatformer(
                 player_sprite=self.player,

@@ -1,4 +1,5 @@
 import arcade
+from functions import resource_path
 
 
 class Enemy(arcade.Sprite):
@@ -24,7 +25,7 @@ class Enemy(arcade.Sprite):
     def _load_textures(self):
         # Загружает текстуры врага
         for frame_num in range(8):
-            texture_path = f"../static/images/enemy/dog_{frame_num}.png"
+            texture_path = resource_path(f"static/images/enemy/dog_{frame_num}.png")
             texture = arcade.load_texture(texture_path)
             self.walk_textures.append(texture)
 
