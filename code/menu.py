@@ -1,5 +1,6 @@
 import arcade.key
 import pyglet
+import json
 from arcade.gui import UIFlatButton, UIManager
 import sqlite3
 from game import FishHunterGame
@@ -9,16 +10,9 @@ from functions import *
 
 path_db = get_database_path()
 
-CONTROLS = {
-    "move_left": arcade.key.A,
-    "move_right": arcade.key.D,
-    "jump_low": arcade.key.W,
-    "jump_high": arcade.key.SPACE,
-    "firework": arcade.key.Q,
-    "music": arcade.key.P,
-    "debug": arcade.key.T,
-}
-
+with open(resource_path("settings/settings.json"), 'r', encoding='utf-8') as f:
+    setting = f.read()
+CONTROLS = json.loads(setting)
 
 class FishHunterMenu(arcade.View):
     def __init__(self):
@@ -290,4 +284,6 @@ class Setting(arcade.View):
 
     def menu(self, event):
         # Вызываем экран с меню
+        with open(resource_path("settings/settings.json"), 'w') as f:
+            json.dump(CONTROLS, f)
         self.window.show_view(FishHunterMenu())
