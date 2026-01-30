@@ -22,12 +22,11 @@ class FishHunterMenu(arcade.View):
         button_parameters = [
             ("Играть", self.start_game),
             ("Результаты", self.result_score),
-            ("Управление", self.keyboard),
             ("Настройки", self.setting),
             ("Выход", self.quit_game)
         ]
 
-        for i in range(5):
+        for i in range(4):
             button = UIFlatButton(
                 text=button_parameters[i][0],
                 width=350,
@@ -65,16 +64,13 @@ class FishHunterMenu(arcade.View):
         self.ui_manager.draw()
 
     def start_game(self, event):
-        self.window.show_view(FishHunterGame(controls))
+        self.window.show_view(FishHunterGame(controls, self))
 
     def result_score(self, event):
         self.window.show_view(ShowResults())
 
     def setting(self, event):
         self.window.show_view(Setting())
-
-    def keyboard(self, event):
-        self.window.show_view(Keyboard())
 
     def quit_game(self, event):
         arcade.exit()
@@ -189,86 +185,13 @@ class ShowResults(arcade.View):
     def menu(self, event):
         self.window.show_view(FishHunterMenu())
 
-
-class Keyboard(arcade.View):
-    def __init__(self):
-        super().__init__()
-        self.ui_manager = UIManager()
-
-        self.row_height = 35
-
-        self.text = [
-            f'{pyglet.window.key.symbol_string(controls["move_left"])} - Движение влево',
-            f'{pyglet.window.key.symbol_string(controls["move_right"])} - Движение вправо',
-            f'{pyglet.window.key.symbol_string(controls["jump_low"])} - Низкий прыжок',
-            f'{pyglet.window.key.symbol_string(controls["jump_high"])} - Высокий прыжок',
-            f'{pyglet.window.key.symbol_string(controls["firework"])} - Создать фейерверк',
-            f'{pyglet.window.key.symbol_string(controls["music"])} - Вкл/выкл музыку',
-            f'{pyglet.window.key.symbol_string(arcade.key.F3)} - Режим отладки'
-        ]
-
-        menu_button = UIFlatButton(
-            text="← Назад в меню",
-            width=250,
-            height=45,
-            style=INFO_BUTTON_STYLE
-        )
-        menu_button.on_click = self.menu
-        self.ui_manager.add(menu_button)
-        menu_button.center_x = 400
-        menu_button.center_y = 500
-
-    def on_show_view(self):
-        self.ui_manager.enable()
-        arcade.set_background_color((50, 90, 150))
-
-    def on_draw(self):
-        self.clear()
-
-        # Цветной фон
-        arcade.set_background_color((50, 90, 150))
-
-        self.ui_manager.draw()
-
-        arcade.draw_text(
-            "Управление в игре",
-            400, 430,
-            (255, 215, 0),
-            28,
-            anchor_x="center",
-            bold=True,
-            font_name=("calibri", "arial")
-        )
-
-        # Рамка
-        arcade.draw_line(100, 400, 700, 400, (100, 149, 237), 3)
-        arcade.draw_line(700, 400, 700, 150, (100, 149, 237), 3)
-        arcade.draw_line(100, 150, 700, 150, (100, 149, 237), 3)
-        arcade.draw_line(100, 400, 100, 150, (100, 149, 237), 3)
-
-        # Список управления
-        for row_index, row in enumerate(self.text):
-            y = 370 - row_index * self.row_height
-            color = (255, 255, 255) if row_index < 6 else (255, 200, 200)
-
-            arcade.draw_text(
-                row,
-                400, y,
-                color,
-                18,
-                anchor_x="center",
-                font_name=("calibri", "arial")
-            )
-
-    def menu(self, event):
-        self.window.show_view(FishHunterMenu())
-
-
 class Setting(arcade.View):
     def __init__(self):
         super().__init__()
         self.ui_manager = UIManager()
 
+        self.row_height = 55
+
         menu_button = UIFlatButton(
             text="← Назад в меню",
             width=250,
@@ -278,7 +201,20 @@ class Setting(arcade.View):
         menu_button.on_click = self.menu
         self.ui_manager.add(menu_button)
         menu_button.center_x = 400
-        menu_button.center_y = 500
+        menu_button.center_y = 550
+
+        self.text_1 = [
+            f'{pyglet.window.key.symbol_string(controls["move_left"])}',
+            f'{pyglet.window.key.symbol_string(controls["move_right"])}',
+            f'{pyglet.window.key.symbol_string(controls["jump_low"])}',
+            f'{pyglet.window.key.symbol_string(controls["jump_high"])}'
+        ]
+
+        self.text_2 = [
+            f'{pyglet.window.key.symbol_string(controls["firework"])}',
+            f'{pyglet.window.key.symbol_string(controls["music"])}',
+            f'{pyglet.window.key.symbol_string(controls["exit"])}'
+        ]
 
         button_parameters = [
             ("Идти налево", self.move_left),
@@ -286,20 +222,33 @@ class Setting(arcade.View):
             ("Низкий прыжок", self.jump_low),
             ("Высокий прыжок", self.jump_high),
             ("Фейерверк", self.firework),
-            ("Музыка", self.music)
+            ("Музыка", self.music),
+            ("Выход в меню", self.exit)
         ]
 
-        for i in range(6):
+        for i in range(4):
             button = UIFlatButton(
                 text=button_parameters[i][0],
-                width=300,
+                width=290,
                 height=45,
                 style=INFO_BUTTON_STYLE
             )
             button.on_click = button_parameters[i][1]
             self.ui_manager.add(button)
-            button.center_x = 600
+            button.center_x = 175
             button.center_y = 380 - i * 55
+
+        for i in range(4, 7):
+            button = UIFlatButton(
+                text=button_parameters[i][0],
+                width=290,
+                height=45,
+                style=INFO_BUTTON_STYLE
+            )
+            button.on_click = button_parameters[i][1]
+            self.ui_manager.add(button)
+            button.center_x = 560
+            button.center_y = 380 - (i - 4) * 55
 
         self.check_move_left = False
         self.check_move_right = False
@@ -307,6 +256,7 @@ class Setting(arcade.View):
         self.check_jump_high = False
         self.check_firework = False
         self.check_music = False
+        self.check_exit = False
 
         self.key_error = False
         self.success_message = False
@@ -326,7 +276,7 @@ class Setting(arcade.View):
 
         arcade.draw_text(
             "Настройка управления",
-            400, 450,
+            400, 470,
             (255, 215, 0),
             28,
             anchor_x="center",
@@ -336,7 +286,7 @@ class Setting(arcade.View):
 
         arcade.draw_text(
             "Нажмите на действие, которое хотите изменить,",
-            400, 420,
+            400, 440,
             arcade.color.LIGHT_BLUE,
             16,
             anchor_x="center",
@@ -345,16 +295,42 @@ class Setting(arcade.View):
 
         arcade.draw_text(
             "затем нажмите новую клавишу на клавиатуре",
-            400, 400,
+            400, 420,
             arcade.color.LIGHT_BLUE,
             16,
             anchor_x="center",
             font_name=("calibri", "arial")
         )
 
+        # Списки управления
+        for row_index, row in enumerate(self.text_1):
+            y = 370 - row_index * self.row_height
+            color = (255, 255, 255) if row_index < 6 else (255, 200, 200)
+
+            arcade.draw_text(
+                row,
+                375, y,
+                color,
+                18,
+                anchor_x="center",
+                font_name=("calibri", "arial")
+            )
+        for row_index, row in enumerate(self.text_2):
+            y = 370 - row_index * self.row_height
+            color = (255, 255, 255) if row_index < 6 else (255, 200, 200)
+
+            arcade.draw_text(
+                row,
+                760, y,
+                color,
+                18,
+                anchor_x="center",
+                font_name=("calibri", "arial")
+            )
+
         # Сообщения
         if self.check_move_right or self.check_move_left or self.check_jump_low or self.check_jump_high \
-                or self.check_firework or self.check_music:
+                or self.check_firework or self.check_music or self.check_exit:
             arcade.draw_text(
                 "Нажмите новую клавишу на клавиатуре",
                 400, 50,
@@ -399,6 +375,7 @@ class Setting(arcade.View):
         self.check_jump_high = False
         self.check_firework = False
         self.check_music = False
+        self.check_exit = False
 
     def move_left(self, event):
         self.all_false()
@@ -424,6 +401,10 @@ class Setting(arcade.View):
         self.all_false()
         self.check_music = True
 
+    def exit(self, event):
+        self.all_false()
+        self.check_exit = True
+
     def on_key_press(self, key, modifiers):
         if not (key in controls.values()):
             if self.check_move_left:
@@ -438,6 +419,8 @@ class Setting(arcade.View):
                 controls["firework"] = key
             elif self.check_music:
                 controls["music"] = key
+            elif self.check_exit:
+                controls["exit"] = key
 
             self.key_error = False
             self.success_message = True
@@ -446,6 +429,19 @@ class Setting(arcade.View):
             self.key_error = True
             self.success_message = False
         self.all_false()
+        self.text_1 = [
+            f'{pyglet.window.key.symbol_string(controls["move_left"])}',
+            f'{pyglet.window.key.symbol_string(controls["move_right"])}',
+            f'{pyglet.window.key.symbol_string(controls["jump_low"])}',
+            f'{pyglet.window.key.symbol_string(controls["jump_high"])}'
+        ]
+
+        self.text_2 = [
+            f'{pyglet.window.key.symbol_string(controls["firework"])}',
+            f'{pyglet.window.key.symbol_string(controls["music"])}',
+            f'{pyglet.window.key.symbol_string(controls["exit"])}'
+        ]
+
 
     def menu(self, event):
         with open(path_settings, 'w') as f:

@@ -17,7 +17,7 @@ path_settings = get_path(file="settings")
 
 
 class FishHunterGame(arcade.View):
-    def __init__(self, controls):
+    def __init__(self, controls, menu_view):
         super().__init__()
         arcade.set_background_color(arcade.color.LIGHT_BLUE)
         self.world_camera = Camera2D()
@@ -44,6 +44,9 @@ class FishHunterGame(arcade.View):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         self.controls = controls
+
+        # Класс для возврата в меню
+        self.menu_view = menu_view
 
         # Создаем врагов
         for i in self.scene["enemies"]:
@@ -87,14 +90,11 @@ class FishHunterGame(arcade.View):
             "fish1": lambda: setattr(self, 'score', self.score + 100),
             "fish3": lambda: setattr(self, 'score', self.score + 200),
             "fish4": lambda: setattr(self, 'score', self.score + 500),
-
             # Рыбы, дающие бафф
             "fish2": lambda: setattr(self, 'jump_height', self.jump_height + BIG_JUMP_DELTA_CONST),
             "fish5": lambda: setattr(self.player, 'speed', self.player.speed + SPEED_DELTA_CONST),
-
             # Особый обработчик для fish6 с дополнительной логикой
             "fish6": lambda: self.apply_active_buff(self.player),
-
             # Фейерверк
             "fireworks": lambda: self.create_firework(self.player.center_x, self.player.center_y + 200)
         }
@@ -439,7 +439,6 @@ class FishHunterGame(arcade.View):
         # Блокируем управление если персонаж мертв
         if not self.player.alive:
             return
-
         if key == self.controls["move_left"]:
             self.left_pressed = True
         elif key == self.controls["move_right"]:
@@ -471,6 +470,12 @@ class FishHunterGame(arcade.View):
                 self.cheating = True
             else:
                 self.cheating = False
+
+        # Для выхода в меню
+        if key == self.controls["exit"]:
+            self.music_enabled = False
+            arcade.stop_sound(self.music_player)
+            self.return_to_menu()
 
     def on_key_release(self, key, modifiers):
         # Блокируем управление если персонаж мертв
