@@ -44,4 +44,4 @@ PARTICLE_COLORS = [
 ]
 
 # Путь до БД
-path_db = get_database_path()
+path_db = get_path()

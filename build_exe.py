@@ -14,7 +14,7 @@ def data_option(source: Path, target):
 def main():
     PyInstaller.__main__.run([
         str(CODE_DIR / "main.py"),
-        "--name=Fish hunter",
+        "--name=Fish_hunter",
         "--noconfirm",
         "--clean",
         "--windowed",
@@ -38,9 +38,11 @@ def main():
         "--hidden-import=jaraco.text",
         "--hidden-import=jaraco.context",
         "--add-data",
+        data_option(PROJECT_ROOT / "settings" / "settings.json", "settings"),
+        "--add-data",
         data_option(PROJECT_ROOT / "static", "static"),
         "--add-data",
-        data_option(PROJECT_ROOT / "for_database" / "records.sqlite", "for_database"),
+        data_option(PROJECT_ROOT / "for_database" / "records.sqlite", "for_database")
     ])
 
 

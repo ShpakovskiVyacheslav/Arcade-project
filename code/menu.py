@@ -8,11 +8,13 @@ from constants import *
 from styles import *
 from functions import *
 
-path_db = get_database_path()
+path_db = get_path()
+path_settings = get_path(file="settings")
 
-with open(resource_path("settings/settings.json"), 'r', encoding='utf-8') as f:
+with open(path_settings, 'r', encoding='utf-8') as f:
     setting = f.read()
 CONTROLS = json.loads(setting)
+
 
 class FishHunterMenu(arcade.View):
     def __init__(self):
@@ -216,7 +218,7 @@ class Setting(arcade.View):
                          arcade.color.BLACK_OLIVE, 14,
                          anchor_x="center", bold=True)
 
-        if self.check_move_right or self.check_move_left or self.check_jump_low or self.check_jump_high\
+        if self.check_move_right or self.check_move_left or self.check_jump_low or self.check_jump_high \
                 or self.check_firework or self.check_music:
             arcade.draw_text("Пожалуйста, нажмите на кнопку, на которую хотите поменять управление",
                              400, 30,
@@ -264,7 +266,7 @@ class Setting(arcade.View):
         self.check_music = True
 
     def on_key_press(self, key, modifiers):
-        if not(key in CONTROLS.values()):
+        if not (key in CONTROLS.values()):
             if self.check_move_left:
                 CONTROLS["move_left"] = key
             elif self.check_move_right:
@@ -284,6 +286,6 @@ class Setting(arcade.View):
 
     def menu(self, event):
         # Вызываем экран с меню
-        with open(resource_path("settings/settings.json"), 'w') as f:
+        with open(path_settings, 'w') as f:
             json.dump(CONTROLS, f)
         self.window.show_view(FishHunterMenu())
