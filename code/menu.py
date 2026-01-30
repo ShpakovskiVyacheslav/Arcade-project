@@ -81,6 +81,7 @@ class ShowResults(arcade.View):
         super().__init__()
         self.ui_manager = UIManager()
 
+        # Открываем базу данных
         self.conn = sqlite3.connect(path_db)
         self.cursor = self.conn.cursor()
         self.data = self.cursor.execute("SELECT result FROM results").fetchall()
@@ -184,6 +185,7 @@ class ShowResults(arcade.View):
 
     def menu(self, event):
         self.window.show_view(FishHunterMenu())
+
 
 class Setting(arcade.View):
     def __init__(self):
@@ -441,7 +443,6 @@ class Setting(arcade.View):
             f'{pyglet.window.key.symbol_string(controls["music"])}',
             f'{pyglet.window.key.symbol_string(controls["exit"])}'
         ]
-
 
     def menu(self, event):
         with open(path_settings, 'w') as f:

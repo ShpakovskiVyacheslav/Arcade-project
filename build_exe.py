@@ -12,6 +12,7 @@ def data_option(source: Path, target):
 
 
 def main():
+    # Создаем exe
     PyInstaller.__main__.run([
         str(CODE_DIR / "main.py"),
         "--name=Fish_hunter",
