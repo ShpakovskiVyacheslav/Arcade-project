@@ -3,17 +3,13 @@ import pyglet
 import json
 from arcade.gui import UIFlatButton, UIManager
 import sqlite3
-from game import FishHunterGame
+from game import FishHunterGame, path_db, path_settings
 from constants import *
 from styles import *
-from functions import *
-
-path_db = get_path()
-path_settings = get_path(file="settings")
 
 with open(path_settings, 'r', encoding='utf-8') as f:
     setting = f.read()
-CONTROLS = json.loads(setting)
+controls = json.loads(setting)
 
 
 class FishHunterMenu(arcade.View):
@@ -53,7 +49,7 @@ class FishHunterMenu(arcade.View):
 
     def start_game(self, event):
         # Вызываем экран с игрой
-        self.window.show_view(FishHunterGame(CONTROLS))
+        self.window.show_view(FishHunterGame(controls))
 
     def result_score(self, event):
         # Вызываем экран с результатами
@@ -133,12 +129,12 @@ class Keyboard(arcade.View):
 
         self.row_height = 30
 
-        self.text = [f'{pyglet.window.key.symbol_string(CONTROLS["move_left"])} - Налево',
-                     f'{pyglet.window.key.symbol_string(CONTROLS["move_right"])} - Направо',
-                     f'{pyglet.window.key.symbol_string(CONTROLS["jump_low"])} - Низкий прыжок',
-                     f'{pyglet.window.key.symbol_string(CONTROLS["jump_high"])} - Высокий прыжок',
-                     f'{pyglet.window.key.symbol_string(CONTROLS["firework"])} - создать фейерверк',
-                     f'{pyglet.window.key.symbol_string(CONTROLS["music"])} - Включить или выключить музыку']
+        self.text = [f'{pyglet.window.key.symbol_string(controls["move_left"])} - Налево',
+                     f'{pyglet.window.key.symbol_string(controls["move_right"])} - Направо',
+                     f'{pyglet.window.key.symbol_string(controls["jump_low"])} - Низкий прыжок',
+                     f'{pyglet.window.key.symbol_string(controls["jump_high"])} - Высокий прыжок',
+                     f'{pyglet.window.key.symbol_string(controls["firework"])} - создать фейерверк',
+                     f'{pyglet.window.key.symbol_string(controls["music"])} - Включить или выключить музыку']
 
         menu_button = UIFlatButton(text="Обратно в меню", width=300, style=STYLE)
         menu_button.on_click = self.menu
@@ -266,19 +262,19 @@ class Setting(arcade.View):
         self.check_music = True
 
     def on_key_press(self, key, modifiers):
-        if not (key in CONTROLS.values()):
+        if not (key in controls.values()):
             if self.check_move_left:
-                CONTROLS["move_left"] = key
+                controls["move_left"] = key
             elif self.check_move_right:
-                CONTROLS["move_right"] = key
+                controls["move_right"] = key
             elif self.check_jump_low:
-                CONTROLS["jump_low"] = key
+                controls["jump_low"] = key
             elif self.check_jump_high:
-                CONTROLS["jump_high"] = key
+                controls["jump_high"] = key
             elif self.check_firework:
-                CONTROLS["firework"] = key
+                controls["firework"] = key
             elif self.check_music:
-                CONTROLS["music"] = key
+                controls["music"] = key
             self.key_error = False
         else:
             self.key_error = True
@@ -287,5 +283,5 @@ class Setting(arcade.View):
     def menu(self, event):
         # Вызываем экран с меню
         with open(path_settings, 'w') as f:
-            json.dump(CONTROLS, f)
+            json.dump(controls, f)
         self.window.show_view(FishHunterMenu())

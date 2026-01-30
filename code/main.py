@@ -1,5 +1,5 @@
+import arcade
 from constants import *
-from styles import *
 from menu import FishHunterMenu
 
 if __name__ == "__main__":

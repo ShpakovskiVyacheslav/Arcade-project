@@ -9,6 +9,12 @@ from enemies import Enemy
 from arcade.particles import FadeParticle, Emitter, EmitBurst
 from functions import *
 
+# Путь до БД
+path_db = get_path()
+
+# Путь до настроек
+path_settings = get_path(file="settings")
+
 
 class FishHunterGame(arcade.View):
     def __init__(self, CONTROLS):
@@ -181,7 +187,7 @@ class FishHunterGame(arcade.View):
 
     def save_result_window(self, event=None):
         if self.check_saving:
-            conn = sqlite3.connect(get_path())
+            conn = sqlite3.connect(path_db)
             cursor = conn.cursor()
 
             # НЕ указываем id - он сгенерируется автоматически

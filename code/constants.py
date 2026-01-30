@@ -1,4 +1,3 @@
-from functions import *
 # РАЗМЕРЫ ЭКРАНА
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -43,5 +42,6 @@ PARTICLE_COLORS = [
     (255, 228, 181), (255, 250, 205), (255, 255, 224)
 ]
 
-# Путь до БД
-path_db = get_path()
+# ИЗМЕНЯЕМЫЕ ФАЙЛЫ
+MODIFY_FILES = {"db": ["for_database/records.sqlite", "records.sqlite"],
+                "settings": ["settings/settings.json", "settings.json"]}

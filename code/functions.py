@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+from constants import MODIFY_FILES
 
 
 def resource_path(relative_path):
@@ -11,35 +12,18 @@ def resource_path(relative_path):
 
 def get_path(file="db"):
     # функция получения пути до базы данных
-    if file == "db":
-        resource_db_path = resource_path("for_database/records.sqlite")
+    correct_path = resource_path(MODIFY_FILES[file][0])
 
-        if not getattr(sys, "_MEIPASS", None):
-            return resource_db_path
+    if not getattr(sys, "_MEIPASS", None):
+        return correct_path
 
-        exe_dir = os.path.dirname(sys.executable)
-        db_path = os.path.join(exe_dir, "records.sqlite")
+    exe_dir = os.path.dirname(sys.executable)
+    path = os.path.join(exe_dir, MODIFY_FILES[file][1])
 
-        if not os.path.exists(db_path):
-            try:
-                shutil.copy2(resource_db_path, db_path)
-            except Exception:
-                return resource_db_path
+    if not os.path.exists(path):
+        try:
+            shutil.copy2(correct_path, path)
+        except Exception:
+            return correct_path
 
-        return db_path
-    if file == "settings":
-        resource_settings_path = resource_path("settings/settings.json")
-
-        if not getattr(sys, "_MEIPASS", None):
-            return resource_settings_path
-
-        exe_dir = os.path.dirname(sys.executable)
-        settings_path = os.path.join(exe_dir, "settings.json")
-
-        if not os.path.exists(settings_path):
-            try:
-                shutil.copy2(resource_settings_path, settings_path)
-            except Exception:
-                return resource_settings_path
-
-        return settings_path
+    return path
